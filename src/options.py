@@ -9,7 +9,7 @@ def args_parser():
     parser = argparse.ArgumentParser()
 
     # federated arguments (Notation for the arguments followed from paper)
-    parser.add_argument('--epochs', type=int, default=10,
+    parser.add_argument('--epochs', type=int, default=1,
                         help="number of rounds of training")
     parser.add_argument('--num_users', type=int, default=100,
                         help="number of users: K")
@@ -25,7 +25,7 @@ def args_parser():
                         help='SGD momentum (default: 0.5)')
 
     # model arguments
-    parser.add_argument('--model', type=str, default='mlp', help='model name')
+    parser.add_argument('--model', type=str, default='cnn', help='model name')
     parser.add_argument('--kernel_num', type=int, default=9,
                         help='number of each kind of kernel')
     parser.add_argument('--kernel_sizes', type=str, default='3,4,5',
@@ -58,7 +58,7 @@ def args_parser():
                         non-i.i.d setting (use 0 for equal splits)')
     parser.add_argument('--stopping_rounds', type=int, default=10,
                         help='rounds of early stopping')
-    parser.add_argument('--verbose', type=int, default=1, help='verbose')
+    parser.add_argument('--verbose', type=int, default=0, help='verbose')
     parser.add_argument('--seed', type=int, default=1, help='random seed')
     args = parser.parse_args()
     return args

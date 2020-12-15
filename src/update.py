@@ -75,16 +75,19 @@ class LocalUpdate(object):
                 loss.backward()
                 optimizer.step()
 
-                if self.args.verbose and (batch_idx % 10 == 0):
-                    print('| Global Round : {} | Local Epoch : {} | [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                        global_round, iter, batch_idx * len(images),
-                        len(self.trainloader.dataset),
-                        100. * batch_idx / len(self.trainloader), loss.item()))
+
                 self.logger.add_scalar('loss', loss.item())
                 batch_loss.append(loss.item())
             epoch_loss.append(sum(batch_loss)/len(batch_loss))
-
+            if self.args.verbose:
+                print('| Global Round : {} | Local Epoch : {} | {} images\tLoss: {:.6f}'.format(
+                    global_round, iter,
+                    len(self.trainloader.dataset),loss.item()))
+        print('| Global Round : {} | Local Epochs : {} | {} images\tLoss: {:.6f}'.format(
+            global_round, self.args.local_ep,
+            len(self.trainloader.dataset), loss.item()))
         return model.state_dict(), sum(epoch_loss) / len(epoch_loss)
+
 
     def inference(self, model):
         """ Returns the inference accuracy and loss.

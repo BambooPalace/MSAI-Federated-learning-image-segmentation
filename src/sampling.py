@@ -35,7 +35,7 @@ def mnist_noniid(dataset, num_users):
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}
     idxs = np.arange(num_shards*num_imgs)
-    labels = dataset.train_labels.numpy()
+    labels = dataset.targets.numpy()
 
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
@@ -52,7 +52,7 @@ def mnist_noniid(dataset, num_users):
     return dict_users
 
 
-def mnist_noniid_unequal(dataset, num_users):
+def mnist_noniid_unequal(dataset, num_users, cifar=False):
     """
     Sample non-I.I.D client data from MNIST dataset s.t clients
     have unequal amount of data
@@ -61,12 +61,16 @@ def mnist_noniid_unequal(dataset, num_users):
     :returns a dict of clients with each clients assigned certain
     number of training imgs
     """
+
     # 60,000 training imgs --> 50 imgs/shard X 1200 shards
     num_shards, num_imgs = 1200, 50
+    # add condition to be reused by cifar
+    if cifar:
+        num_shards, num_imgs = 1000, 50
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}
     idxs = np.arange(num_shards*num_imgs)
-    labels = dataset.train_labels.numpy()
+    labels = np.array(dataset.targets)
 
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
@@ -74,7 +78,7 @@ def mnist_noniid_unequal(dataset, num_users):
     idxs = idxs_labels[0, :]
 
     # Minimum and maximum shards assigned per client:
-    min_shard = 1
+    min_shard = 1 
     max_shard = 30
 
     # Divide the shards into random chunks for every client
@@ -169,7 +173,7 @@ def cifar_noniid(dataset, num_users):
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}
     idxs = np.arange(num_shards*num_imgs)
-    # labels = dataset.train_labels.numpy()
+    # labels = dataset.targets.numpy()
     labels = np.array(dataset.targets)
 
     # sort labels

@@ -1,5 +1,5 @@
 Options:
-Namespace(dataset='mnist', epochs=10, frac=0.1, gpu=None, iid=0, kernel_num=9, kernel_sizes='3,4,5', local_bs=10, local_ep=10, lr=0.1, max_pool='True', model='cnn', momentum=0.5, norm='batch_norm', num_channels=1, num_classes=10, num_filters=32, num_users=100, optimizer='adam', seed=1, stopping_rounds=10, unequal=0, verbose=0)
+Namespace(dataset='mnist', epochs=10, frac=0.1, gpu=None, iid=0, kernel_num=9, kernel_sizes='3,4,5', local_bs=10, local_ep=10, lr=0.01, max_pool='True', model='cnn', momentum=0.5, norm='batch_norm', num_channels=1, num_classes=10, num_filters=32, num_users=100, optimizer='sgd', seed=1, stopping_rounds=10, unequal=1, verbose=0)
 Global model:
 CNNMnist(
   (conv1): Conv2d(1, 10, kernel_size=(5, 5), stride=(1, 1))
@@ -15,9 +15,9 @@ CNNMnist(
  | Global Training Round : 2 |
 
  
-Avg Training Stats after 2 global rounds:
-Training Loss : 0.9669627170973388
-Train Accuracy: 0.00% 
+Avg Training Stats after {epoch+1} global rounds:
+Training Loss : 0.622908644430153
+Train Accuracy: 100.00% 
 
 
  | Global Training Round : 3 |
@@ -26,9 +26,9 @@ Train Accuracy: 0.00%
  | Global Training Round : 4 |
 
  
-Avg Training Stats after 4 global rounds:
-Training Loss : 0.8946052557452183
-Train Accuracy: 0.00% 
+Avg Training Stats after {epoch+1} global rounds:
+Training Loss : 0.4198737161421959
+Train Accuracy: 100.00% 
 
 
  | Global Training Round : 5 |
@@ -37,9 +37,9 @@ Train Accuracy: 0.00%
  | Global Training Round : 6 |
 
  
-Avg Training Stats after 6 global rounds:
-Training Loss : 0.8919192256103409
-Train Accuracy: 100.00% 
+Avg Training Stats after {epoch+1} global rounds:
+Training Loss : 0.35043158676807923
+Train Accuracy: 93.33% 
 
 
  | Global Training Round : 7 |
@@ -48,9 +48,9 @@ Train Accuracy: 100.00%
  | Global Training Round : 8 |
 
  
-Avg Training Stats after 8 global rounds:
-Training Loss : 0.9032807113546593
-Train Accuracy: 0.00% 
+Avg Training Stats after {epoch+1} global rounds:
+Training Loss : 0.30596153129363773
+Train Accuracy: 95.29% 
 
 
  | Global Training Round : 9 |
@@ -59,13 +59,13 @@ Train Accuracy: 0.00%
  | Global Training Round : 10 |
 
  
-Avg Training Stats after 10 global rounds:
-Training Loss : 0.9034014643956988
-Train Accuracy: 0.00% 
+Avg Training Stats after {epoch+1} global rounds:
+Training Loss : 0.2779640153787378
+Train Accuracy: 91.11% 
 
  
  Results after 10 global rounds of training:
-|---- Avg Train Accuracy: 0.00%
-|---- Test Accuracy: 10.10%
+|---- Avg Train Accuracy: 91.11%
+|---- Test Accuracy: 96.24%
 
- Total Run Time: 312.7701
+ Total Run Time: 351.2432

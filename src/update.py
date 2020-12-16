@@ -46,9 +46,9 @@ class LocalUpdate(object):
         trainloader = DataLoader(DatasetSplit(dataset, idxs_train),
                                  batch_size=self.args.local_bs, shuffle=True)
         validloader = DataLoader(DatasetSplit(dataset, idxs_val),
-                                 batch_size=int(len(idxs_val)/10), shuffle=False)
+                                 batch_size=len(idxs_val), shuffle=False) #remove int(len(idxs_val)/10)
         testloader = DataLoader(DatasetSplit(dataset, idxs_test),
-                                batch_size=int(len(idxs_test)/10), shuffle=False)
+                                batch_size=len(idxs_test), shuffle=False)
         return trainloader, validloader, testloader
 
     def update_weights(self, model, global_round):

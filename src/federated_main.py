@@ -77,8 +77,8 @@ if __name__ == '__main__':
     lines = ['Options:', str(args), 'Global model:', str(global_model)]
     for epoch in tqdm(range(args.epochs)):
         local_weights, local_losses = [], []
-        print(f'\n | Global Training Round : {epoch+1} |\n')
-        lines.append(f'\n | Global Training Round : {epoch+1} |\n')
+        print('\n | Global Training Round : {} |\n'.format(epoch+1))
+        lines.append('\n | Global Training Round : {} |\n'.format(epoch+1))
 
         global_model.train()
         m = max(int(args.frac * args.num_users), 1)
@@ -118,19 +118,19 @@ if __name__ == '__main__':
         # print global training loss after every 'i' rounds
         if (epoch+1) % print_every == 0:
             print(f' \nAvg Training Stats after {epoch+1} global rounds:')
-            print(f'Training Loss : {np.mean(np.array(train_loss))}')
+            print('Training Loss : {}'.format(np.mean(np.array(train_loss))))
             print('Train Accuracy: {:.2f}% \n'.format(100*train_accuracy[-1]))
-            lines.append(f' \nAvg Training Stats after {epoch+1} global rounds:')
-            lines.append(f'Training Loss : {np.mean(np.array(train_loss))}')
+            lines.append(' \nAvg Training Stats after {epoch+1} global rounds:')
+            lines.append('Training Loss : {}'.format(np.mean(np.array(train_loss))))
             lines.append('Train Accuracy: {:.2f}% \n'.format(100*train_accuracy[-1]))
 
     # Test inference after completion of training
     test_acc, test_loss = test_inference(args, global_model, test_dataset)
 
-    print(f' \n Results after {args.epochs} global rounds of training:')
+    print(' \n Results after {} global rounds of training:'.format(args.epochs))
     print("|---- Avg Train Accuracy: {:.2f}%".format(100*train_accuracy[-1]))
     print("|---- Test Accuracy: {:.2f}%".format(100*test_acc))
-    lines.append(f' \n Results after {args.epochs} global rounds of training:')
+    lines.append(' \n Results after {} global rounds of training:'.format(args.epochs))
     lines.append("|---- Avg Train Accuracy: {:.2f}%".format(100*train_accuracy[-1]))
     lines.append("|---- Test Accuracy: {:.2f}%".format(100*test_acc))
 

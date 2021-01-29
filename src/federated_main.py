@@ -29,7 +29,7 @@ if __name__ == '__main__':
     args = args_parser()
     exp_details(args)
 
-    device = 'cpu' if torch.cuda.is_available() else 'cuda'
+    device = 'cuda' if torch.cuda.is_available() else 'cup'
     print('device: ', device)
 
     # load dataset and user groups

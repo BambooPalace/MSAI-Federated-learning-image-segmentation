@@ -45,13 +45,13 @@ class LocalUpdate(object):
         idxs_val = idxs[int(0.8*len(idxs)):int(0.9*len(idxs))]
         idxs_test = idxs[int(0.9*len(idxs)):]
 
-        # mod1: add num_workers, to see if can speed up training
+        # mod1: add num_workers, to see if can speed up training. ANS is no for cifar
         trainloader = DataLoader(DatasetSplit(dataset, idxs_train),
                                  batch_size=self.args.local_bs, num_workers=self.args.num_workers, shuffle=True)
         validloader = DataLoader(DatasetSplit(dataset, idxs_val),
                                  batch_size=max(len(idxs_val)//10,1), num_workers=self.args.num_workers, shuffle=False) # mod2: minsize 1 if bs ~0
         testloader = DataLoader(DatasetSplit(dataset, idxs_test),
-                                batch_size=max(len(idxs_test)//10,1), num_workers=self.args.num_workers, shuffle=False)
+                                batch_size=max(len(igitdxs_test)//10,1), num_workers=self.args.num_workers, shuffle=False)
         return trainloader, validloader, testloader
 
     def update_weights(self, model, global_round):

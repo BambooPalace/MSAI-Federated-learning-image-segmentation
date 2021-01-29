@@ -19,8 +19,8 @@ def args_parser():
                         help="the number of local epochs: E")
     parser.add_argument('--local_bs', type=int, default=10,
                         help="local batch size: B")
-    parser.add_argument('--num_workers', type=int, default=4,
-                        help='local data loader num of workers, speed up training')
+    parser.add_argument('--num_workers', type=int, default=1,
+                        help='test colab gpu num_workers=1 is faster')
     parser.add_argument('--lr', type=float, default=0.01,
                         help='learning rate')
     parser.add_argument('--momentum', type=float, default=0.5,

@@ -135,8 +135,8 @@ if __name__ == '__main__':
     lines.append("|---- Test Accuracy: {:.2f}%".format(100*test_acc))
 
     # Saving the objects train_loss and train_accuracy:
-    file_name = './save/objects/{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}].pkl'.\
-        format(args.dataset, args.model, args.epochs, args.frac, args.iid,
+    file_name = './save/fed_{}_{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}].pkl'.\
+        format(args.dataset, args.model, args.epochs, args.frac, args.iid, args.unequal,
                args.local_ep, args.local_bs)
 
     with open(file_name, 'wb') as f:
@@ -157,9 +157,9 @@ if __name__ == '__main__':
     plt.plot(range(len(train_loss)), train_loss, color='r')
     plt.ylabel('Training loss')
     plt.xlabel('Communication Rounds')
-    plt.savefig('./save/fed_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_loss.png'.
-                format(args.dataset, args.model, args.epochs, args.frac,
-                       args.iid, args.local_ep, args.local_bs))
+    plt.savefig('./save/fed_{}_{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}].png'.\
+        format(args.dataset, args.model, args.epochs, args.frac, args.iid, args.unequal,
+               args.local_ep, args.local_bs))
 
     # Plot Average Accuracy vs Communication rounds
     plt.figure()
@@ -167,13 +167,13 @@ if __name__ == '__main__':
     plt.plot(range(len(train_accuracy)), train_accuracy, color='k')
     plt.ylabel('Average Accuracy')
     plt.xlabel('Communication Rounds')
-    plt.savefig('./save/fed_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_acc.png'.
-                format(args.dataset, args.model, args.epochs, args.frac,
-                       args.iid, args.local_ep, args.local_bs))
+    plt.savefig('./save/fed_{}_{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}].png'.\
+        format(args.dataset, args.model, args.epochs, args.frac, args.iid, args.unequal,
+               args.local_ep, args.local_bs))
 
     # Logging
-    filename = './save/fed_{}_{}_e{}_C[{}]_iid[{}]_E[{}]_B[{}].txt'.\
-        format(args.dataset, args.model, args.epochs, args.frac, args.iid,
+    filename = './save/fed_{}_{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}].txt'.\
+        format(args.dataset, args.model, args.epochs, args.frac, args.iid, args.unequal,
                args.local_ep, args.local_bs)
     with open(filename, 'w') as w:
         for line in lines:

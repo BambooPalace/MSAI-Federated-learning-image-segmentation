@@ -1,0 +1,71 @@
+Options:
+Namespace(dataset='mnist', epochs=10, frac=0.1, gpu=None, iid=0, kernel_num=9, kernel_sizes='3,4,5', local_bs=100, local_ep=10, lr=0.01, max_pool='True', model='cnn', momentum=0.5, norm='batch_norm', num_channels=1, num_classes=10, num_filters=32, num_users=100, optimizer='sgd', seed=1, stopping_rounds=10, unequal=0, verbose=0)
+Global model:
+CNNMnist(
+  (conv1): Conv2d(1, 10, kernel_size=(5, 5), stride=(1, 1))
+  (conv2): Conv2d(10, 20, kernel_size=(5, 5), stride=(1, 1))
+  (conv2_drop): Dropout2d(p=0.5, inplace=False)
+  (fc1): Linear(in_features=320, out_features=50, bias=True)
+  (fc2): Linear(in_features=50, out_features=10, bias=True)
+)
+
+ | Global Training Round : 1 |
+
+
+ | Global Training Round : 2 |
+
+ 
+Avg Training Stats after 2 global rounds:
+Training Loss : 0.7177068303525448
+Train Accuracy: 0.00% 
+
+
+ | Global Training Round : 3 |
+
+
+ | Global Training Round : 4 |
+
+ 
+Avg Training Stats after 4 global rounds:
+Training Loss : 0.5624991423166357
+Train Accuracy: 96.67% 
+
+
+ | Global Training Round : 5 |
+
+
+ | Global Training Round : 6 |
+
+ 
+Avg Training Stats after 6 global rounds:
+Training Loss : 0.4725702147288247
+Train Accuracy: 85.00% 
+
+
+ | Global Training Round : 7 |
+
+
+ | Global Training Round : 8 |
+
+ 
+Avg Training Stats after 8 global rounds:
+Training Loss : 0.42018446459172987
+Train Accuracy: 0.00% 
+
+
+ | Global Training Round : 9 |
+
+
+ | Global Training Round : 10 |
+
+ 
+Avg Training Stats after 10 global rounds:
+Training Loss : 0.3790862357944133
+Train Accuracy: 96.67% 
+
+ 
+ Results after 10 global rounds of training:
+|---- Avg Train Accuracy: 96.67%
+|---- Test Accuracy: 67.90%
+
+ Total Run Time: 262.6714

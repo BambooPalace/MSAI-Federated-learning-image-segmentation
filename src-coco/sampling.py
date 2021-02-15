@@ -7,17 +7,32 @@ import numpy as np
 from torchvision import datasets, transforms
 
 
-def mnist_iid(dataset, num_users):    
-    num_items = int(len(dataset)/num_users)
-    dict_users, all_idxs = {}, [i for i in range(len(dataset))]
-    for i in range(num_users):
-        dict_users[i] = set(np.random.choice(all_idxs, num_items,
-                                             replace=False))
-        all_idxs = list(set(all_idxs) - dict_users[i])
-    return dict_users
+def convert_coco_mask_to_top_class(dataset):
+    # return the numpy array of top class of each img
+    targets = [] 
+    for (_, target) in dataset:
+        classes = np.unique(target.numpy()) # a sorted array
+         # remove background class 0, 255
+        if len(classes) and classes[0] == 0:
+            classes = classes[1:]
+        if len(classes) and classes[-1] == 255:
+            classes = classes[:-1]
 
-def coco_iid(dataset, num_users):
-
+        if len(classes) == 0:
+            targets.append(0)
+        elif len(classes) == 1:
+            targets.append(classes[0])
+        else:
+            pixels_per_class = []
+            for c in classes:
+                pixels = len(np.where(target==c)[0])
+                pixels_per_class.append(pixels)
+            # get the top class with most pixels
+            top_class = classes[np.argmax(pixels_per_class)]
+            targets.append(top_class) 
+    return np.array(targets)
+        
+def coco_iid(dataset, num_users):    
     num_items = int(len(dataset)/num_users)
     dict_users, all_idxs = {}, [i for i in range(len(dataset))]
     for i in range(num_users):
@@ -27,32 +42,6 @@ def coco_iid(dataset, num_users):
     return dict_users
 
 def coco_noniid(dataset, num_users):
-    # TODO 
-    # 60,000 training imgs -->  200 imgs/shard X 300 shards
-    num_shards, num_imgs = 200, 300
-    idx_shard = [i for i in range(num_shards)]
-    dict_users = {i: np.array([]) for i in range(num_users)}
-    idxs = np.arange(num_shards*num_imgs)
-    labels = dataset.targets.numpy()
-
-    # sort labels
-    idxs_labels = np.vstack((idxs, labels))
-    idxs_labels = idxs_labels[:, idxs_labels[1, :].argsort()]
-    idxs = idxs_labels[0, :]
-
-    # divide and assign 2 shards/client
-    for i in range(num_users):
-        rand_set = set(np.random.choice(idx_shard, 2, replace=False))
-        idx_shard = list(set(idx_shard) - rand_set)
-        for rand in rand_set:
-            dict_users[i] = np.concatenate(
-                (dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]), axis=0)
-    return dict_users
-    
-
-
-
-def mnist_noniid(dataset, num_users):
     """
     Sample non-I.I.D client data from MNIST dataset
     :param dataset:
@@ -60,11 +49,12 @@ def mnist_noniid(dataset, num_users):
     :return:
     """
     # 60,000 training imgs -->  200 imgs/shard X 300 shards
-    num_shards, num_imgs = 200, 300
+    num_shards = 200
+    num_imgs = len(dataset) // num_shards 
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}
     idxs = np.arange(num_shards*num_imgs)
-    labels = dataset.targets.numpy()
+    labels = convert_coco_mask_to_top_class(dataset)
 
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
@@ -80,8 +70,7 @@ def mnist_noniid(dataset, num_users):
                 (dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]), axis=0)
     return dict_users
 
-
-def mnist_noniid_unequal(dataset, num_users, cifar=False):
+def coco_noniid_unequal(dataset, num_users):
     """
     Sample non-I.I.D client data from MNIST dataset s.t clients
     have unequal amount of data
@@ -92,14 +81,12 @@ def mnist_noniid_unequal(dataset, num_users, cifar=False):
     """
 
     # 60,000 training imgs --> 50 imgs/shard X 1200 shards
-    num_shards, num_imgs = 300, 200# origin 1200, 50
-    # add condition to be reused by cifar
-    if cifar:
-        num_shards, num_imgs = 250, 200# origin 1000, 50
+    num_shards = 1000
+    num_imgs = len(dataset) // num_shards
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}
     idxs = np.arange(num_shards*num_imgs)
-    labels = np.array(dataset.targets)
+    labels = convert_coco_mask_to_top_class(dataset)
 
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
@@ -108,7 +95,7 @@ def mnist_noniid_unequal(dataset, num_users, cifar=False):
 
     # Minimum and maximum shards assigned per client:
     min_shard = 1 
-    max_shard = 3 # original is 30
+    max_shard = 30 # original is 30
 
     # Divide the shards into random chunks for every client
     # s.t the sum of these chunks = num_shards
@@ -173,59 +160,3 @@ def mnist_noniid_unequal(dataset, num_users, cifar=False):
                     axis=0)
 
     return dict_users
-
-
-def cifar_iid(dataset, num_users):
-    """
-    Sample I.I.D. client data from CIFAR10 dataset
-    :param dataset:
-    :param num_users:
-    :return: dict of image index
-    """
-    num_items = int(len(dataset)/num_users)
-    dict_users, all_idxs = {}, [i for i in range(len(dataset))]
-    for i in range(num_users):
-        dict_users[i] = set(np.random.choice(all_idxs, num_items,
-                                             replace=False))
-        all_idxs = list(set(all_idxs) - dict_users[i])
-    return dict_users
-
-
-def cifar_noniid(dataset, num_users):
-    """
-    Sample non-I.I.D client data from CIFAR10 dataset
-    :param dataset:
-    :param num_users:
-    :return:
-    """
-    num_shards, num_imgs = 200, 250
-    idx_shard = [i for i in range(num_shards)]
-    dict_users = {i: np.array([]) for i in range(num_users)}
-    idxs = np.arange(num_shards*num_imgs)
-    # labels = dataset.targets.numpy()
-    labels = np.array(dataset.targets)
-
-    # sort labels
-    idxs_labels = np.vstack((idxs, labels))
-    idxs_labels = idxs_labels[:, idxs_labels[1, :].argsort()]
-    idxs = idxs_labels[0, :]
-
-    # divide and assign
-    for i in range(num_users):
-        rand_set = set(np.random.choice(idx_shard, 2, replace=False))
-        idx_shard = list(set(idx_shard) - rand_set)
-        for rand in rand_set:
-            dict_users[i] = np.concatenate(
-                (dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]), axis=0)
-    return dict_users
-
-
-if __name__ == '__main__':
-    dataset_train = datasets.MNIST('./data/mnist/', train=True, download=True,
-                                   transform=transforms.Compose([
-                                       transforms.ToTensor(),
-                                       transforms.Normalize((0.1307,),
-                                                            (0.3081,))
-                                   ]))
-    num = 100
-    d = mnist_noniid(dataset_train, num)

@@ -20,7 +20,9 @@ class DatasetSplit(Dataset):
 
     def __getitem__(self, item):
         image, label = self.dataset[self.idxs[item]]
-        return torch.tensor(image), torch.tensor(label)
+        # return torch.tensor(image), torch.tensor(label)
+        # pytorch warning and suggest below 
+        return image.clone().detach(), torch.tensor(label)
 
 
 class LocalUpdate(object):
@@ -29,7 +31,7 @@ class LocalUpdate(object):
         self.logger = logger
         self.trainloader, self.validloader, self.testloader = self.train_val_test(
             dataset, list(idxs))
-        self.device = 'cuda' if args.gpu else 'cpu'
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         # Default criterion set to NLL loss function
         self.criterion = nn.NLLLoss().to(self.device)
 
@@ -43,12 +45,13 @@ class LocalUpdate(object):
         idxs_val = idxs[int(0.8*len(idxs)):int(0.9*len(idxs))]
         idxs_test = idxs[int(0.9*len(idxs)):]
 
+        # mod1: add num_workers, to see if can speed up training. ANS is no for cifar
         trainloader = DataLoader(DatasetSplit(dataset, idxs_train),
-                                 batch_size=self.args.local_bs, shuffle=True)
+                                 batch_size=self.args.local_bs, num_workers=self.args.num_workers, shuffle=True)
         validloader = DataLoader(DatasetSplit(dataset, idxs_val),
-                                 batch_size=len(idxs_val), shuffle=False) #mod1: remove int(len(idxs_val)/10) as round to 1
+                                 batch_size=max(len(idxs_val)//10,1), num_workers=self.args.num_workers, shuffle=False) # mod2: minsize 1 if bs ~0
         testloader = DataLoader(DatasetSplit(dataset, idxs_test),
-                                batch_size=len(idxs_test), shuffle=False)
+                                batch_size=max(len(idxs_test)//10,1), num_workers=self.args.num_workers, shuffle=False)
         return trainloader, validloader, testloader
 
     def update_weights(self, model, global_round):
@@ -59,7 +62,7 @@ class LocalUpdate(object):
         # Set optimizer for the local updates
         if self.args.optimizer == 'sgd':
             optimizer = torch.optim.SGD(model.parameters(), lr=self.args.lr,
-                                        momentum=0.5)
+                                        momentum=self.args.momentum)
         elif self.args.optimizer == 'adam':
             optimizer = torch.optim.Adam(model.parameters(), lr=self.args.lr,
                                          weight_decay=1e-4)
@@ -121,7 +124,7 @@ def test_inference(args, model, test_dataset):
     model.eval()
     loss, total, correct = 0.0, 0.0, 0.0
 
-    device = 'cuda' if args.gpu else 'cpu'
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     criterion = nn.NLLLoss().to(device)
     testloader = DataLoader(test_dataset, batch_size=128,
                             shuffle=False)

@@ -17,15 +17,18 @@ def args_parser():
                         help='the fraction of clients: C')
     parser.add_argument('--local_ep', type=int, default=10,
                         help="the number of local epochs: E")
-    parser.add_argument('--local_bs', type=int, default=10,
-                        help="local batch size: B")
+    parser.add_argument('--local_bs', type=int, default=4,
+                        help="local batch size: B, fed_avg default is 10")
+    parser.add_argument('--num_workers', type=int, default=4,
+                        help='test colab gpu num_workers=1 is faster')
     parser.add_argument('--lr', type=float, default=0.01,
                         help='learning rate')
-    parser.add_argument('--momentum', type=float, default=0.5,
-                        help='SGD momentum (default: 0.5)')
+    parser.add_argument('--momentum', type=float, default=0.9,
+                        help='SGD momentum (default: 0.9)')
 
     # model arguments
-    parser.add_argument('--model', type=str, default='cnn', help='model name')
+    parser.add_argument('--model', type=str, default='fcn_mobilenetv2', \
+                        choices=['fcn_mobilenetv2', 'deeplabv3_mobilenetv2'], help='model name')
     parser.add_argument('--kernel_num', type=int, default=9,
                         help='number of each kind of kernel')
     parser.add_argument('--kernel_sizes', type=str, default='3,4,5',
@@ -43,9 +46,9 @@ def args_parser():
                         strided convolutions")
 
     # other arguments
-    parser.add_argument('--dataset', type=str, default='mnist', help="name \
+    parser.add_argument('--dataset', type=str, default='coco', help="name \
                         of dataset")
-    parser.add_argument('--num_classes', type=int, default=10, help="number \
+    parser.add_argument('--num_classes', type=int, default=81, help="number \
                         of classes")
     parser.add_argument('--gpu', default=None, help="To use cuda, set \
                         to a specific GPU ID. Default set to use CPU.")
@@ -60,5 +63,10 @@ def args_parser():
                         help='rounds of early stopping')
     parser.add_argument('--verbose', type=int, default=0, help='verbose')
     parser.add_argument('--seed', type=int, default=1, help='random seed')
+    parser.add_argument('-aux', '--aux_lr_param', type=int, default=2, help='times of normal learning rate used for auxiliary classifier ')
+    parser.add_argument('--lr_scheduler', default='lambda', choices=['lambda', 'step'], help='learning rate scheduler')
+    parser.add_argument('--checkpoint', type=str, default=None, help='full file name of the checkpoint')
+    parser.add_argument('--save_frequency', type=int, default=10, help='number of epochs to save checkpoint')
+    parser.add_argument('-root', type=str, default='./', help='home directory')
     args = parser.parse_args()
     return args

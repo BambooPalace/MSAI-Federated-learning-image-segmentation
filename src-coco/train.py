@@ -9,7 +9,7 @@ import torchvision
 
 from coco_utils import get_coco
 import transforms as T
-import utils
+import _utils as utils
 
 
 def get_dataset(dir_path, name, image_set, transform):
@@ -90,6 +90,7 @@ def train_one_epoch(model, criterion, optimizer, data_loader, lr_scheduler, devi
         lr_scheduler.step()
 
         metric_logger.update(loss=loss.item(), lr=optimizer.param_groups[0]["lr"])
+    return str(metric_logger)
 
 
 def main(args):

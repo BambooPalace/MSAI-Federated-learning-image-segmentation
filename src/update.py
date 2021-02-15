@@ -6,6 +6,8 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
+from train import criterion
+
 
 class DatasetSplit(Dataset):
     """An abstract Dataset class wrapped around Pytorch Dataset class.
@@ -51,7 +53,7 @@ class LocalUpdate(object):
         validloader = DataLoader(DatasetSplit(dataset, idxs_val),
                                  batch_size=max(len(idxs_val)//10,1), num_workers=self.args.num_workers, shuffle=False) # mod2: minsize 1 if bs ~0
         testloader = DataLoader(DatasetSplit(dataset, idxs_test),
-                                batch_size=max(len(igitdxs_test)//10,1), num_workers=self.args.num_workers, shuffle=False)
+                                batch_size=max(len(idxs_test)//10,1), num_workers=self.args.num_workers, shuffle=False)
         return trainloader, validloader, testloader
 
     def update_weights(self, model, global_round):
@@ -125,7 +127,6 @@ def test_inference(args, model, test_dataset):
     loss, total, correct = 0.0, 0.0, 0.0
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    criterion = nn.NLLLoss().to(device)
     testloader = DataLoader(test_dataset, batch_size=128,
                             shuffle=False)
 

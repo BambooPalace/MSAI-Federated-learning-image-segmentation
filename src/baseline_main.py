@@ -19,16 +19,14 @@ from models import MLP, CNNMnist, CNNFashion_Mnist, CNNCifar
 
 if __name__ == '__main__':
     args = args_parser()
-    if args.gpu:
-        torch.cuda.set_device(args.gpu)
-    device = 'cuda' if args.gpu else 'cpu'
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     # load datasets
     train_dataset, test_dataset, _ = get_dataset(args)
 
     # BUILD MODEL
     if args.model == 'cnn':
-        # Convolutional neural netork
+        # Convolutional neural netorks
         if args.dataset == 'mnist':
             global_model = CNNMnist(args=args)
         elif args.dataset == 'fmnist':
@@ -65,6 +63,7 @@ if __name__ == '__main__':
     epoch_loss = []
 
     print('training starts:')
+    lines = ['Options:', str(args), 'Global model:', str(global_model)]
     for epoch in tqdm(range(args.epochs)):
         batch_loss = []
 
@@ -77,7 +76,7 @@ if __name__ == '__main__':
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
-            lines = ['Options:', str(args), 'Global model:', str(global_model)]
+            
             if batch_idx % 100 == 0:
                 # print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 #     epoch+1, batch_idx * len(images), len(trainloader.dataset),

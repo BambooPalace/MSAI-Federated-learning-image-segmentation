@@ -5,7 +5,7 @@ Implementation of the vanilla federated learning paper : [Communication-Efficien
 
 Experiments are produced on MNIST, Fashion MNIST and CIFAR10 (both IID and non-IID). In case of non-IID, the data amongst the users can be split equally or unequally.
 
-Since the purpose of these experiments are to illustrate the effectiveness of the federated learning paradigm, only simple models such as MLP and CNN are used.
+For the purpose of master project, image segmentation of COCO dataset (81 classes) is implemented with fcn_mobilenetv2.
 
 ## Requirments
 Install all the packages from requirments.txt

@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 # Python version: 3.6
 
-
-from tqdm import tqdm
+import os
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import datetime
 
+from tqdm import tqdm
 import torch
 from torch.utils.data import DataLoader
 
@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
     # load datasets
     train_dataset, test_dataset, _ = get_dataset(args)
-    trainloader = DataLoader(train_dataset, batch_size=args.local_bs, num_workers=args.num_workers, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=args.local_bs, num_workers=args.num_workers, shuffle=True)
     test_loader = DataLoader(train_dataset, batch_size=1, num_workers=args.num_workers, shuffle=False)
 
     # BUILD MODEL
@@ -49,7 +49,7 @@ if __name__ == '__main__':
         {"params": [p for p in global_model.classifier.parameters() if p.requires_grad]}]
         if global_model.aux_classifier:
             params = [p for p in global_model.aux_classifier.parameters() if p.requires_grad]
-            params_to_optimize.append({"params": params, "lr": lr * aux_lr_param}) #multiplier default is 10
+            params_to_optimize.append({"params": params, "lr": args.lr * args.aux_lr_param}) #multiplier default is 10
     else:
         params_to_optimize = [p for p in global_model.parameters() if p.requires_grad]
 
@@ -68,6 +68,7 @@ if __name__ == '__main__':
     }
     lr_scheduler = scheduler_dict[args.lr_scheduler]
 
+    start_ep = 0
     if args.checkpoint is not None:
         checkpoint = torch.load(
             os.path.join( args.root, '/save/checkpoints', args.checkpoint),

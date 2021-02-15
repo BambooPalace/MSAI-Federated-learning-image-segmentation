@@ -10,7 +10,7 @@ from torchvision import datasets
 from transforms import Compose
 from train import get_transform
 from coco_utils import ConvertCocoPolysToMask, FilterAndRemapCocoCategories
-
+from sampling import *
 
 
 
@@ -23,8 +23,8 @@ def get_dataset(args):
     if args.dataset == 'coco':
         # path2data = os.path.join(args.root, 'data/coco/val2017')
         # path2ann = os.path.join(args.root, 'data/coco/annotations/instances_val2017.json')
-        path2data = r'C:\Users\cgong002\Google Drive\data\coco\val2017'
-        path2ann = r'‪C:\Users\cgong002\Google Drive\data\coco\annotations\instances_val2017.json'
+        path2data = r"C:\Users\cgong002\Google Drive\data\coco\val2017" #use single quotes seems to cause error
+        path2ann = r"C:\Users\cgong002\Google Drive\data\coco\annotations\instances_val2017.json"
 
         untransformed_data = datasets.CocoDetection(path2data, path2ann)
         catIds = untransformed_data.coco.getCatIds()
@@ -38,9 +38,9 @@ def get_dataset(args):
         # split train and test indice
         torch.manual_seed(args.seed)
         split_idx=4000
-        idxs = torch.randperm(len(train_data)).tolist()
-        train_dataset = torch.utils.data.Subset(train_data, idxs[:split_idx])
-        test_dataset = torch.utils.data.Subset(val_data, idxs[split_idx:])
+        idxs = torch.randperm(len(train_dataset)).tolist()
+        train_dataset = torch.utils.data.Subset(train_dataset, idxs[:split_idx])
+        test_dataset = torch.utils.data.Subset(test_dataset, idxs[split_idx:])
 
         # sample training data amongst users
         if args.iid:

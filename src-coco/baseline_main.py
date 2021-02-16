@@ -6,7 +6,6 @@ import os
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
-import datetime
 
 from tqdm import tqdm
 import torch
@@ -21,7 +20,7 @@ from train import train_one_epoch, evaluate, criterion
 
 if __name__ == '__main__':
     args = args_parser()
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cuda' if torch.cuda.is_available() and not args.cpu_only else 'cpu'
     torch.manual_seed(args.seed)
 
     # load datasets
@@ -64,27 +63,27 @@ if __name__ == '__main__':
 
     scheduler_dict = {
         'step': torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1),
-        'lambda':torch.optim.lr_scheduler.LambdaLR(optimizer, lambda x: (1 - x / (len(train_loader)*args.epochs)) ** 0.9)
+        'lambda':torch.optim.lr_scheduler.LambdaLR(optimizer, lambda x: (1 - x / (len(train_loader)*max(1,args.epochs))) ** 0.9)
     }
     lr_scheduler = scheduler_dict[args.lr_scheduler]
 
     start_ep = 0
     if args.checkpoint is not None:
         checkpoint = torch.load(
-            os.path.join( args.root, '/save/checkpoints', args.checkpoint),
+            os.path.join( args.root, 'save/checkpoints', args.checkpoint),
             map_location=device)
         global_model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])
         lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
         start_ep = checkpoint['epoch']   
 
-    print('training starts:')
-    lines = ['Options:', str(args), 'Global model:', str(global_model)]
-    for epoch in range(start_ep, args.epochs):
-        logger = train_one_epoch(global_model, criterion, optimizer, train_loader, lr_scheduler, device, epoch, print_freq=500)
+    print(args.epochs,' epochs of training starts:')
+    lines = ['Options:', str(args)]
+    for epoch in tqdm(range(start_ep, args.epochs)):
+        logger = train_one_epoch(global_model, criterion, optimizer, train_loader, lr_scheduler, device, epoch, print_freq=1000)
         lines.append(logger)
         lr_scheduler.step()
-        if epoch % args.save_frequency == 0:
+        if epoch % args.save_frequency == 0 or epoch == args.epochs-1:
             torch.save(
                 {
                     'model': global_model.state_dict(),
@@ -94,18 +93,19 @@ if __name__ == '__main__':
                     'model_name': args.model
                 },
                 os.path.join(args.root, 'save/checkpoints', '{}_auxlr{}_lr{}_{}_ep{}.pth'.format(args.model, args.aux_lr_param, args.lr, args.lr_scheduler, epoch)))
-    # STUCK on eval function...
-    print('start evaluating at', datetime.datetime.now())
-    confmat = evaluate(global_model, test_loader, device, num_classes=args.num_classes)
-    print(confmat)
-    lines.append('Confusion matrix on test dataset: ')
-    lines.append(confmat)
+    print('training ends')
+    
+    if not args.train_only:
+        confmat = evaluate(global_model, test_loader, device, num_classes=args.num_classes)
+        print(confmat)
+        lines.append('Confusion matrix on test dataset: ')
+        lines.append(str(confmat))
 
 
     # logging
     
     filename = '{}_auxlr{}_lr{}_{}_ep{}.txt'.format(args.model, args.aux_lr_param, args.lr, args.lr_scheduler, args.epochs)
-    path = os.path.join(args.root, filename)
+    path = os.path.join(args.root, 'save', filename)
     with open(path, 'w') as w:
         for line in lines:
             w.write(line + '\n')

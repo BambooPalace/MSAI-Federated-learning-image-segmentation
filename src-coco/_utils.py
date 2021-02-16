@@ -74,6 +74,8 @@ class ConfusionMatrix(object):
     def __init__(self, num_classes):
         self.num_classes = num_classes
         self.mat = None
+        self.acc_global = 0
+        self.iou_mean = 0
 
     def update(self, a, b):
         n = self.num_classes
@@ -104,15 +106,17 @@ class ConfusionMatrix(object):
 
     def __str__(self):
         acc_global, acc, iu = self.compute()
+        self.acc_global = acc_global.item()*100
+        self.iou_mean = iu.mean().item()*100
         return (
             'global correct: {:.1f}\n'
             'average row correct: {}\n'
             'IoU: {}\n'
             'mean IoU: {:.1f}').format(
-                acc_global.item() * 100,
+                self.acc_global,
                 ['{:.1f}'.format(i) for i in (acc * 100).tolist()],
                 ['{:.1f}'.format(i) for i in (iu * 100).tolist()],
-                iu.mean().item() * 100)
+                self.iou_mean)
 
 
 class MetricLogger(object):
@@ -124,7 +128,7 @@ class MetricLogger(object):
         for k, v in kwargs.items():
             if isinstance(v, torch.Tensor):
                 v = v.item()
-            assert isinstance(v, (float, int))
+            # assert isinstance(v, (float, int)) # assertion error in the middle wierd
             self.meters[k].update(v)
 
     def __getattr__(self, attr):

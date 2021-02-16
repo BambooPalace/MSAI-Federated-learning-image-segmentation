@@ -57,14 +57,17 @@ def criterion(inputs, target):
 
 def evaluate(model, data_loader, device, num_classes):
     model.eval()
+    loss = 0
     confmat = utils.ConfusionMatrix(num_classes)
-    metric_logger = utils.MetricLogger(delimiter="  ")
     header = 'Test:'
     with torch.no_grad():
-        for image, target in metric_logger.log_every(data_loader, 100, header):
+        for image, target in data_loader:
             image, target = image.to(device), target.to(device)
             output = model(image)
             output = output['out']
+            # [optional] return loss
+            # batch_loss = criterion(output, target)
+            # loss += batch_loss.item()
 
             confmat.update(target.flatten(), output.argmax(1).flatten())
 

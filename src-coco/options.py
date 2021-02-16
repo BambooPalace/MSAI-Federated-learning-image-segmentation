@@ -15,11 +15,11 @@ def args_parser():
                         help="number of users: K")
     parser.add_argument('--frac', type=float, default=0.1,
                         help='the fraction of clients: C')
-    parser.add_argument('--local_ep', type=int, default=10,
-                        help="the number of local epochs: E")
-    parser.add_argument('--local_bs', type=int, default=4,
+    parser.add_argument('--local_ep', type=int, default=1,
+                        help="the number of local epochs: E, default is 10")
+    parser.add_argument('--local_bs', type=int, default=1,
                         help="local batch size: B, fed_avg default is 10")
-    parser.add_argument('--num_workers', type=int, default=4,
+    parser.add_argument('--num_workers', type=int, default=1,
                         help='test colab gpu num_workers=1 is faster')
     parser.add_argument('--lr', type=float, default=0.01,
                         help='learning rate')
@@ -50,8 +50,7 @@ def args_parser():
                         of dataset")
     parser.add_argument('--num_classes', type=int, default=81, help="number \
                         of classes")
-    parser.add_argument('--gpu', default=None, help="To use cuda, set \
-                        to a specific GPU ID. Default set to use CPU.")
+    parser.add_argument('--cpu_only', action='store_true', help="indicate to use cpu only")
     parser.add_argument('--optimizer', type=str, default='sgd', help="type \
                         of optimizer")
     parser.add_argument('--iid', type=int, default=1,
@@ -66,7 +65,8 @@ def args_parser():
     parser.add_argument('-aux', '--aux_lr_param', type=int, default=2, help='times of normal learning rate used for auxiliary classifier ')
     parser.add_argument('--lr_scheduler', default='lambda', choices=['lambda', 'step'], help='learning rate scheduler')
     parser.add_argument('--checkpoint', type=str, default=None, help='full file name of the checkpoint')
-    parser.add_argument('--save_frequency', type=int, default=10, help='number of epochs to save checkpoint')
-    parser.add_argument('-root', type=str, default='./', help='home directory')
+    parser.add_argument('--save_frequency', type=int, default=1, help='number of epochs to save checkpoint')
+    parser.add_argument('--root', type=str, default='./', help='home directory')
+    parser.add_argument('--train_only', action='store_true')
     args = parser.parse_args()
     return args

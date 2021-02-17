@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Python version: 3.6
 
-
+import time
 import numpy as np
 from torchvision import datasets, transforms
 
@@ -48,14 +48,14 @@ def coco_noniid(dataset, num_users):
     :param num_users:
     :return:
     """
-    # 60,000 training imgs -->  200 imgs/shard X 300 shards
+    timer = time.time()
+    # 4,000 training imgs -->  200 shards
     num_shards = 200
     num_imgs = len(dataset) // num_shards 
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}
     idxs = np.arange(num_shards*num_imgs)
     labels = convert_coco_mask_to_top_class(dataset)
-
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
     idxs_labels = idxs_labels[:, idxs_labels[1, :].argsort()]
@@ -68,6 +68,7 @@ def coco_noniid(dataset, num_users):
         for rand in rand_set:
             dict_users[i] = np.concatenate(
                 (dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]), axis=0)
+    print('Time consumed to get user indices: ', time.time()-timer)
     return dict_users
 
 def coco_noniid_unequal(dataset, num_users):
@@ -79,8 +80,8 @@ def coco_noniid_unequal(dataset, num_users):
     :returns a dict of clients with each clients assigned certain
     number of training imgs
     """
-
-    # 60,000 training imgs --> 50 imgs/shard X 1200 shards
+    timer = time.time()
+    # 4000 training imgs --> 1000 shards
     num_shards = 1000
     num_imgs = len(dataset) // num_shards
     idx_shard = [i for i in range(num_shards)]
@@ -158,5 +159,5 @@ def coco_noniid_unequal(dataset, num_users):
                 dict_users[k] = np.concatenate(
                     (dict_users[k], idxs[rand*num_imgs:(rand+1)*num_imgs]),
                     axis=0)
-
+    print('Time consumed to get user indices: ', time.time()-timer)
     return dict_users

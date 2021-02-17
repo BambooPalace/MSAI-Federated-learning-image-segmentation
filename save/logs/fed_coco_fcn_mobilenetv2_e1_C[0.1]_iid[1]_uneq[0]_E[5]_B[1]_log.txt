@@ -1,0 +1,45 @@
+Options:
+Namespace(aux_lr_param=2, checkpoint=None, cpu_only=False, dataset='coco', epochs=1, frac=0.1, iid=1, kernel_num=9, kernel_sizes='3,4,5', local_bs=1, local_ep=5, lr=0.01, lr_scheduler='lambda', max_pool='True', model='fcn_mobilenetv2', momentum=0.9, norm='batch_norm', num_channels=1, num_classes=81, num_filters=32, num_users=100, num_workers=1, optimizer='sgd', root='./', save_frequency=1, seed=1, stopping_rounds=10, train_only=False, unequal=0, verbose=0)
+
+ | Global Training Round : 1 |
+
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 8.108527
+Run Time: 61.9369
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 4.998778
+Run Time: 60.6809
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 0.927807
+Run Time: 60.7583
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 4.518548
+Run Time: 60.0573
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 2.144732
+Run Time: 60.0740
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 3.002294
+Run Time: 60.1187
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 0.848546
+Run Time: 60.7397
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 1.006122
+Run Time: 60.3731
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 1.542497
+Run Time: 60.2360
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 3.099319
+Run Time: 60.2962
+
+Avg Training Stats after 1 global rounds:
+Training Loss : 3.1611424117162823
+Local Test Accuracy: 60.57% 
+
+Local Test IoU: nan% 
+
+Run Time: 389.2079
+
+Results after 1 global rounds of training:
+|---- Global Test Accuracy: 64.84%
+|---- Global Test IoU: 0.80%
+
+ Total Run Time: 1960.2883
+
+Avg Training Stats after 2 global rounds:
+Training Loss : 2.8368642416968943
+Local Test Accuracy: 72.03%
+Local Test IoU: nan%
+Run Time: 411.6761

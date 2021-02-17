@@ -72,6 +72,7 @@ def evaluate(model, data_loader, device, num_classes):
             confmat.update(target.flatten(), output.argmax(1).flatten())
 
         confmat.reduce_from_all_processes()
+        confmat.compute()
 
     return confmat
 

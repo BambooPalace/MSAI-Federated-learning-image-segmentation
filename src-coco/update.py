@@ -5,7 +5,7 @@
 import time
 import torch
 from torch import nn
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, Subset
 from train import criterion, evaluate
 
 
@@ -24,7 +24,7 @@ class DatasetSplit(Dataset):
         image, label = self.dataset[self.idxs[item]]
         # return torch.tensor(image), torch.tensor(label)
         # pytorch warning and suggest below 
-        return image.clone().detach(), label.clone().detach()
+        return image.clone().detach().float(), label.clone().detach()
 
 
 class LocalUpdate(object):
@@ -51,7 +51,7 @@ class LocalUpdate(object):
                                 batch_size=max(len(idxs_test)//10,1), num_workers=self.args.num_workers, shuffle=False)
         return trainloader, testloader
 
-    def update_weights(self, model, global_round):
+    def update_weights(self, model, global_round, log):
         # Set mode to train model
         model.train()
         epoch_loss = []
@@ -91,20 +91,29 @@ class LocalUpdate(object):
                 model.zero_grad()
                 log_probs = model(images)
                 loss = criterion(log_probs, labels)
+                optimizer.zero_grad() # try this for unequal noniid, as train.py has this line
                 loss.backward()
                 optimizer.step()
 
                 batch_loss.append(loss.item())
             epoch_loss.append(sum(batch_loss)/len(batch_loss))
-            if self.args.verbose:
-                print('| Global Round : {} | Local Epoch : {} | {} images\tLoss: {:.6f}'.format(
-                    global_round, iter,
-                    len(self.trainloader.dataset),loss.item()))
             lr_scheduler.step()
-        print('| Global Round : {} | Local Epochs : {} | {} images\tLoss: {:.6f}'.format(
-            global_round, self.args.local_ep,
-            len(self.trainloader.dataset), loss.item()))
-        print('\n Run Time: {0:0.4f}'.format(time.time()-start_time))
+
+            if self.args.verbose:
+                string = '| Global Round : {} | Local Epoch : {} | {} images\tLoss: {:.6f}'.format(
+                    global_round, iter, len(self.trainloader.dataset),loss.item())
+                print(string)
+                log.append(string)            
+
+        # after training, print logs
+        strings = [
+            '| Global Round : {} | Local Epochs : {} | {} images\tLoss: {:.6f}'.format(
+            global_round, self.args.local_ep, len(self.trainloader.dataset), loss.item()),
+            'Run Time: {0:0.4f}'.format(time.time()-start_time),
+            ]
+        for s in strings:
+            print(s)
+            log.append(s)
         return model.state_dict(), sum(epoch_loss) / len(epoch_loss)
 
 
@@ -118,9 +127,7 @@ class LocalUpdate(object):
 def test_inference(args, model, testloader):
     """ Returns the test accuracy and loss.
     """
-
-    model.eval()
     device = 'cuda' if torch.cuda.is_available() and not args.cpu_only else 'cpu'
     confmat = evaluate(model, testloader, device, args.num_classes)
-
+    print(confmat)
     return confmat.acc_global, confmat.iou_mean

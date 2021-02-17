@@ -76,6 +76,8 @@ class ConfusionMatrix(object):
         self.mat = None
         self.acc_global = 0
         self.iou_mean = 0
+        self.acc = None
+        self.iu = None
 
     def update(self, a, b):
         n = self.num_classes
@@ -90,11 +92,14 @@ class ConfusionMatrix(object):
         self.mat.zero_()
 
     def compute(self):
+        ''' compute and update self metrics '''
         h = self.mat.float()
-        acc_global = torch.diag(h).sum() / h.sum()
-        acc = torch.diag(h) / h.sum(1)
-        iu = torch.diag(h) / (h.sum(1) + h.sum(0) - torch.diag(h))
-        return acc_global, acc, iu
+        self.acc_global = torch.diag(h).sum() / h.sum()
+        self.acc_global = self.acc_global.item()*100
+        self.acc = torch.diag(h) / h.sum(1)
+        self.iu = torch.diag(h) / (h.sum(1) + h.sum(0) - torch.diag(h))
+        self.iou_mean = self.iu.mean().item()*100
+        # return acc_global, acc, iu
 
     def reduce_from_all_processes(self):
         if not torch.distributed.is_available():
@@ -105,17 +110,15 @@ class ConfusionMatrix(object):
         torch.distributed.all_reduce(self.mat)
 
     def __str__(self):
-        acc_global, acc, iu = self.compute()
-        self.acc_global = acc_global.item()*100
-        self.iou_mean = iu.mean().item()*100
+        self.compute()
         return (
             'global correct: {:.1f}\n'
             'average row correct: {}\n'
             'IoU: {}\n'
             'mean IoU: {:.1f}').format(
                 self.acc_global,
-                ['{:.1f}'.format(i) for i in (acc * 100).tolist()],
-                ['{:.1f}'.format(i) for i in (iu * 100).tolist()],
+                ['{:.1f}'.format(i) for i in (self.acc * 100).tolist()],
+                ['{:.1f}'.format(i) for i in (self.iu * 100).tolist()],
                 self.iou_mean)
 
 

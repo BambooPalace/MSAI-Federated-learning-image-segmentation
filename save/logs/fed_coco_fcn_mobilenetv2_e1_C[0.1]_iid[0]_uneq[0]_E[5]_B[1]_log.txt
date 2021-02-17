@@ -1,0 +1,59 @@
+Options:
+Namespace(aux_lr_param=2, checkpoint=None, cpu_only=False, dataset='coco', epochs=1, frac=0.1, iid=0, kernel_num=9, kernel_sizes='3,4,5', local_bs=1, local_ep=5, lr=0.01, lr_scheduler='lambda', max_pool='True', model='fcn_mobilenetv2', momentum=0.9, norm='batch_norm', num_channels=1, num_classes=81, num_filters=32, num_users=100, num_workers=1, optimizer='sgd', root='./', save_frequency=1, seed=1, stopping_rounds=10, train_only=True, unequal=0, verbose=0)
+device: cuda
+
+Training global model on 0.1 of 100 users locally for 1 epochs
+
+ | Global Training Round : 1 |
+
+
+User idx : 92
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 3.324824
+Run Time: 61.0091
+
+User idx : 55
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 0.849569
+Run Time: 60.4127
+
+User idx : 26
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 3.295532
+Run Time: 60.3691
+
+User idx : 25
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 0.341453
+Run Time: 59.9918
+
+User idx : 87
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 2.192795
+Run Time: 60.3006
+
+User idx : 42
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 1.201661
+Run Time: 60.1913
+
+User idx : 79
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 1.641153
+Run Time: 60.4769
+
+User idx : 80
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 3.339076
+Run Time: 60.3020
+
+User idx : 60
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 0.481880
+Run Time: 60.2155
+
+User idx : 32
+| Global Round : 0 | Local Epochs : 5 | 32 images	Loss: 1.951836
+Run Time: 60.2239
+
+Weight averaging
+Global model weights save to checkpoint
+Testing global model on 100 users
+
+Avg Training Stats after 1 global rounds:
+Training Loss : 2.3044006434082984
+Local Test Accuracy: 40.21% 
+Local Test IoU: nan%
+Run Time: 371.5308
+

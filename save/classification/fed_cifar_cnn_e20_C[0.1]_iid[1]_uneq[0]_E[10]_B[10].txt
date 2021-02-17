@@ -1,0 +1,127 @@
+Options:
+Namespace(dataset='cifar', epochs=20, frac=0.1, gpu=None, iid=1, kernel_num=9, kernel_sizes='3,4,5', local_bs=10, local_ep=10, lr=0.01, max_pool='True', model='cnn', momentum=0.5, norm='batch_norm', num_channels=1, num_classes=10, num_filters=32, num_users=100, optimizer='sgd', seed=1, stopping_rounds=10, unequal=0, verbose=0)
+Global model:
+CNNCifar(
+  (conv1): Conv2d(3, 6, kernel_size=(5, 5), stride=(1, 1))
+  (pool): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (conv2): Conv2d(6, 16, kernel_size=(5, 5), stride=(1, 1))
+  (fc1): Linear(in_features=400, out_features=120, bias=True)
+  (fc2): Linear(in_features=120, out_features=84, bias=True)
+  (fc3): Linear(in_features=84, out_features=10, bias=True)
+)
+
+ | Global Training Round : 1 |
+
+
+ | Global Training Round : 2 |
+
+ 
+Avg Training Stats after {epoch+1} global rounds:
+Training Loss : 2.2380811160504814
+Train Accuracy: 32.00% 
+
+
+ | Global Training Round : 3 |
+
+
+ | Global Training Round : 4 |
+
+ 
+Avg Training Stats after {epoch+1} global rounds:
+Training Loss : 1.9924656507782634
+Train Accuracy: 40.00% 
+
+
+ | Global Training Round : 5 |
+
+
+ | Global Training Round : 6 |
+
+ 
+Avg Training Stats after {epoch+1} global rounds:
+Training Loss : 1.7185019499628493
+Train Accuracy: 60.00% 
+
+
+ | Global Training Round : 7 |
+
+
+ | Global Training Round : 8 |
+
+ 
+Avg Training Stats after {epoch+1} global rounds:
+Training Loss : 1.4660678792609323
+Train Accuracy: 52.00% 
+
+
+ | Global Training Round : 9 |
+
+
+ | Global Training Round : 10 |
+
+ 
+Avg Training Stats after {epoch+1} global rounds:
+Training Loss : 1.2854086105206575
+Train Accuracy: 58.00% 
+
+
+ | Global Training Round : 11 |
+
+
+ | Global Training Round : 12 |
+
+ 
+Avg Training Stats after {epoch+1} global rounds:
+Training Loss : 1.1557214248288121
+Train Accuracy: 48.00% 
+
+
+ | Global Training Round : 13 |
+
+
+ | Global Training Round : 14 |
+
+ 
+Avg Training Stats after {epoch+1} global rounds:
+Training Loss : 1.0581152816300123
+Train Accuracy: 36.00% 
+
+
+ | Global Training Round : 15 |
+
+
+ | Global Training Round : 16 |
+
+ 
+Avg Training Stats after {epoch+1} global rounds:
+Training Loss : 0.9823256535327618
+Train Accuracy: 46.00% 
+
+
+ | Global Training Round : 17 |
+
+
+ | Global Training Round : 18 |
+
+ 
+Avg Training Stats after {epoch+1} global rounds:
+Training Loss : 0.9219200383232528
+Train Accuracy: 42.00% 
+
+
+ | Global Training Round : 19 |
+
+
+ | Global Training Round : 20 |
+
+ 
+Avg Training Stats after {epoch+1} global rounds:
+Training Loss : 0.8719033392917707
+Train Accuracy: 58.00% 
+
+ 
+ Results after 20 global rounds of training:
+|---- Avg Train Accuracy: 58.00%
+|---- Test Accuracy: 46.16%
+
+ Total Run Time: 540.3954

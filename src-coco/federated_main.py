@@ -23,17 +23,21 @@ from utils import get_dataset, average_weights, exp_details
 from models import fcn_mobilenetv2, deeplabv3_mobilenetv3
 from train import train_one_epoch, evaluate, criterion
 
+   
+
 if __name__ == '__main__':
-    start_time = time.time()
-
-    # define paths
-
     args = args_parser()
-    exp_details(args)
+    log = ['Options:', str(args)]
+    def print_log(string, log=log):
+        ''' print string and append to log[list] '''
+        print(string)
+        log.append(string)
 
+    start_time = time.time()
+    exp_details(args)
+    torch.manual_seed(args.seed)    
     device = 'cuda' if torch.cuda.is_available() and not args.cpu_only else 'cpu'
-    print('device: ', device)
-    torch.manual_seed(args.seed)
+    print_log('device: ' + device)
 
     # load dataset and user groups
     train_dataset, test_dataset, user_groups = get_dataset(args)
@@ -51,14 +55,9 @@ if __name__ == '__main__':
     # Set the model to train and send it to device.
     global_model.to(device)
     global_model.train()
-    # print(global_model)
 
     # copy weights
     global_weights = global_model.state_dict()
-
-    # Training
-    train_loss, local_test_accuracy, local_test_iou = [], [], []
-    print_every = 2
 
     # Load checkpoint
     start_ep = 0
@@ -67,40 +66,38 @@ if __name__ == '__main__':
             os.path.join( args.root, 'save/checkpoints', args.checkpoint),
             map_location=device)
         global_model.load_state_dict(checkpoint['model'])
-        start_ep = checkpoint['epoch']   
+        start_ep = checkpoint['epoch'] + 1 
 
-    # Global rounds
-    print(args.epochs,' epochs of training starts:')
-    log = ['Options:', str(args)]
+    # Global rounds / Training
+    print_log('\nTraining global model on {} of {} users locally for {} epochs'.format(args.frac, args.num_users, args.epochs))
+    train_loss, local_test_accuracy, local_test_iou = [], [], []
+    print_every = 1
     for epoch in tqdm(range(start_ep, args.epochs)):
         local_weights, local_losses = [], []
-        print('\n | Global Training Round : {} |\n'.format(epoch+1))
-        #
-        log.append('\n | Global Training Round : {} |\n'.format(epoch+1))
+        print_log('\n | Global Training Round : {} |\n'.format(epoch+1))
 
-        print('training global model on {} of {} users locally'.format(args.frac, args.num_users))
         global_model.train()
         m = max(int(args.frac * args.num_users), 1)
         idxs_users = np.random.choice(range(args.num_users), m, replace=False)
         # Local training
         for idx in idxs_users:
-            print('user idx : ', idx)
+            print_log('\nUser idx : ' + str(idx))
 
             local_model = LocalUpdate(args=args, dataset=train_dataset,
                                       idxs=user_groups[idx])
-            w, loss = local_model.update_weights(
-                model=copy.deepcopy(global_model), global_round=epoch)
+            w, loss = local_model.update_weights(model=copy.deepcopy(global_model),
+                                                global_round=epoch, log=log)
             local_weights.append(copy.deepcopy(w))
             local_losses.append(copy.deepcopy(loss))
 
         # update global weights
-        print('weight averaging')
+        print_log('\nWeight averaging')
         global_weights = average_weights(local_weights)
         # update global weights
         global_model.load_state_dict(global_weights)
         # save global model to checkpoint
         exp_name = 'fed_{}_{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}]'.\
-                    format(args.dataset, args.model, args.epochs, args.frac,\
+                    format(args.dataset, args.model, epoch+1, args.frac,\
                          args.iid, args.unequal, args.local_ep, args.local_bs)
         if epoch % args.save_frequency == 0 or epoch == args.epochs-1:
             torch.save(
@@ -111,15 +108,16 @@ if __name__ == '__main__':
                 },
                 os.path.join(args.root, 'save/checkpoints', exp_name+'.pth')
             )
-        print('global model weights save to checkpoint')
+        print_log('Global model weights save to checkpoint')
 
         loss_avg = sum(local_losses) / len(local_losses)
         train_loss.append(loss_avg)
 
         # Calculate avg test accuracy over all users at every epoch
+        last_time = time.time()
+        print_log('Testing global model on {} users'.format(args.num_users))
         list_acc, list_iou = [], []
         global_model.eval()
-        print('test global model on {} users'.format(args.num_users))
         for c in tqdm(range(args.num_users)):
             local_model = LocalUpdate(args=args, dataset=train_dataset,
                                       idxs=user_groups[idx])            
@@ -131,32 +129,22 @@ if __name__ == '__main__':
 
         # print global training loss after every 'i' rounds
         if (epoch+1) % print_every == 0:
-            print(f' \nAvg Training Stats after {epoch+1} global rounds:')
-            print('Training Loss : {}'.format(np.mean(np.array(train_loss))))
-            print('Local Test Accuracy: {:.2f}% \n'.format(local_test_accuracy[-1]))
-            print('Local Test IoU: {:.2f}% \n'.format(local_test_iou[-1]))
-            #
-            log.append(' \nAvg Training Stats after {epoch+1} global rounds:')
-            log.append('Training Loss : {}'.format(np.mean(np.array(train_loss))))
-            log.append('Local Test Accuracy: {:.2f}% \n'.format(local_test_accuracy[-1]))
-            log.append('Local Test IoU: {:.2f}% \n'.format(local_test_iou[-1]))
+            print_log('\nAvg Training Stats after {} global rounds:'.format(epoch+1))
+            print_log('Training Loss : {}'.format(np.mean(np.array(train_loss))))
+            print_log('Local Test Accuracy: {:.2f}% '.format(local_test_accuracy[-1]))
+            print_log('Local Test IoU: {:.2f}%'.format(local_test_iou[-1]))
+            print_log('Run Time: {0:0.4f}\n'.format(time.time()-last_time))
+
 
     # Inference on test dataset after completion of training
-    test_acc, test_iou = test_inference(args, global_model, test_loader)
+    if not args.train_only:
+        print_log('\nTesting global model on global test dataset')
+        test_acc, test_iou = test_inference(args, global_model, test_loader)
 
-    print(' \n Results after {} global rounds of training:'.format(args.epochs))
-    print("|---- Avg local test Accuracy: {:.2f}%".format(local_test_accuracy[-1]))
-    print("|---- Global Test Accuracy: {:.2f}%".format(test_acc))
-    print("|---- Global Test IoU: {:.2f}%".format(test_iou))
-    #
-    log.append(' \n Results after {} global rounds of training:'.format(args.epochs))
-    log.append("|---- Avg Train Accuracy: {:.2f}%".format(local_test_accuracy[-1]))
-    log.append("|---- Test Accuracy: {:.2f}%".format(test_acc))
-    log.append("|---- Global Test IoU: {:.2f}%".format(test_iou))
-
-    print('\n Total Run Time: {0:0.4f}'.format(time.time()-start_time))
-    #
-    log.append('\n Total Run Time: {0:0.4f}'.format(time.time() - start_time))
+        print_log('\nResults after {} global rounds of training:'.format(args.epochs))
+        print_log("|---- Global Test Accuracy: {:.2f}%".format(test_acc))
+        print_log("|---- Global Test IoU: {:.2f}%".format(test_iou))
+        print_log('\n Total Run Time: {0:0.4f}'.format(time.time()-start_time))
 
     # Plot Loss curve
     plt.figure()
@@ -164,7 +152,7 @@ if __name__ == '__main__':
     plt.plot(range(len(train_loss)), train_loss, color='r')
     plt.ylabel('Training loss')
     plt.xlabel('Communication Rounds')
-    plt.savefig(os.path.join(args.root, 'save', exp_name+'_loss.png'))
+    plt.savefig(os.path.join(args.root, 'save/training_curves', exp_name+'_loss.png'))
 
     # Plot Average Accuracy vs Communication rounds
     plt.figure()
@@ -174,10 +162,10 @@ if __name__ == '__main__':
     plt.ylabel('Average Accuracy')
     plt.xlabel('Communication Rounds')
     plt.legend()
-    plt.savefig(os.path.join(args.root, 'save', exp_name+'_metrics.png'))
+    plt.savefig(os.path.join(args.root, 'save/training_curves', exp_name+'_metrics.png'))
 
     # Logging
-    filename = os.path.join(args.root, 'save', exp_name+'_log.txt')
+    filename = os.path.join(args.root, 'save/logs', exp_name+'_log.txt')
     with open(filename, 'w') as w:
         for line in log:
             w.write(line + '\n')

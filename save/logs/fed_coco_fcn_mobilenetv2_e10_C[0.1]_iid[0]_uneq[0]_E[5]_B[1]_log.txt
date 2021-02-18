@@ -1,0 +1,445 @@
+Options:
+Namespace(aux_lr_param=2, checkpoint='fed_coco_fcn_mobilenetv2_e2_C[0.1]_iid[0]_uneq[0]_E[5]_B[1].pth', cpu_only=False, dataset='coco', epochs=10, frac=0.1, iid=0, kernel_num=9, kernel_sizes='3,4,5', local_bs=1, local_ep=5, lr=0.01, lr_scheduler='lambda', max_pool='True', model='fcn_mobilenetv2', momentum=0.9, norm='batch_norm', num_channels=1, num_classes=81, num_filters=32, num_users=100, num_workers=1, optimizer='sgd', root='./', save_frequency=1, seed=1, stopping_rounds=10, train_only=False, unequal=0, verbose=0)
+device: cuda
+
+Training global model on 0.1 of 100 users locally for 10 epochs
+
+ | Global Training Round : 3 |
+
+
+User idx : 51
+| Global Round : 2 | Local Epochs : 5 | 32 images	Loss: 1.788275
+Run Time: 61.8607
+
+User idx : 69
+| Global Round : 2 | Local Epochs : 5 | 32 images	Loss: 1.585903
+Run Time: 60.4306
+
+User idx : 74
+| Global Round : 2 | Local Epochs : 5 | 32 images	Loss: 1.241886
+Run Time: 60.5787
+
+User idx : 50
+| Global Round : 2 | Local Epochs : 5 | 32 images	Loss: 1.884363
+Run Time: 60.6030
+
+User idx : 32
+| Global Round : 2 | Local Epochs : 5 | 32 images	Loss: 2.009498
+Run Time: 60.5671
+
+User idx : 92
+| Global Round : 2 | Local Epochs : 5 | 32 images	Loss: 0.483594
+Run Time: 60.5317
+
+User idx : 29
+| Global Round : 2 | Local Epochs : 5 | 32 images	Loss: 0.310582
+Run Time: 62.1416
+
+User idx : 40
+| Global Round : 2 | Local Epochs : 5 | 32 images	Loss: 2.896787
+Run Time: 62.0812
+
+User idx : 27
+| Global Round : 2 | Local Epochs : 5 | 32 images	Loss: 1.674895
+Run Time: 62.5862
+
+User idx : 17
+| Global Round : 2 | Local Epochs : 5 | 32 images	Loss: 1.030791
+Run Time: 62.3774
+
+Weight averaging
+Global model weights save to checkpoint
+Testing global model on 100 users
+
+Avg Training Stats after 3 global rounds:
+Training Loss : 1.931589320898056
+Local Test Accuracy: 95.65% 
+Local Test IoU: nan%
+Run Time: 436.4010
+
+
+ | Global Training Round : 4 |
+
+
+User idx : 67
+| Global Round : 3 | Local Epochs : 5 | 32 images	Loss: 1.388581
+Run Time: 60.3860
+
+User idx : 55
+| Global Round : 3 | Local Epochs : 5 | 32 images	Loss: 3.020381
+Run Time: 60.8117
+
+User idx : 15
+| Global Round : 3 | Local Epochs : 5 | 32 images	Loss: 2.102273
+Run Time: 60.6716
+
+User idx : 7
+| Global Round : 3 | Local Epochs : 5 | 32 images	Loss: 0.861845
+Run Time: 60.4283
+
+User idx : 33
+| Global Round : 3 | Local Epochs : 5 | 32 images	Loss: 2.731578
+Run Time: 60.6756
+
+User idx : 70
+| Global Round : 3 | Local Epochs : 5 | 32 images	Loss: 0.618005
+Run Time: 62.2736
+
+User idx : 97
+| Global Round : 3 | Local Epochs : 5 | 32 images	Loss: 0.646415
+Run Time: 62.3355
+
+User idx : 5
+| Global Round : 3 | Local Epochs : 5 | 32 images	Loss: 2.827884
+Run Time: 62.4179
+
+User idx : 36
+| Global Round : 3 | Local Epochs : 5 | 32 images	Loss: 4.224409
+Run Time: 62.3672
+
+User idx : 4
+| Global Round : 3 | Local Epochs : 5 | 32 images	Loss: 0.765302
+Run Time: 64.6796
+
+Weight averaging
+Global model weights save to checkpoint
+Testing global model on 100 users
+
+Avg Training Stats after 4 global rounds:
+Training Loss : 1.9490063520381224
+Local Test Accuracy: 51.85% 
+Local Test IoU: nan%
+Run Time: 390.1903
+
+
+ | Global Training Round : 5 |
+
+
+User idx : 75
+| Global Round : 4 | Local Epochs : 5 | 32 images	Loss: 0.661919
+Run Time: 60.1394
+
+User idx : 15
+| Global Round : 4 | Local Epochs : 5 | 32 images	Loss: 1.771090
+Run Time: 60.3489
+
+User idx : 11
+| Global Round : 4 | Local Epochs : 5 | 32 images	Loss: 2.937763
+Run Time: 60.4159
+
+User idx : 84
+| Global Round : 4 | Local Epochs : 5 | 32 images	Loss: 2.913581
+Run Time: 60.4210
+
+User idx : 44
+| Global Round : 4 | Local Epochs : 5 | 32 images	Loss: 1.767443
+Run Time: 60.4459
+
+User idx : 53
+| Global Round : 4 | Local Epochs : 5 | 32 images	Loss: 1.338518
+Run Time: 62.0713
+
+User idx : 31
+| Global Round : 4 | Local Epochs : 5 | 32 images	Loss: 1.098470
+Run Time: 62.1863
+
+User idx : 18
+| Global Round : 4 | Local Epochs : 5 | 32 images	Loss: 1.593266
+Run Time: 62.1438
+
+User idx : 70
+| Global Round : 4 | Local Epochs : 5 | 32 images	Loss: 0.439641
+Run Time: 62.3359
+
+User idx : 82
+| Global Round : 4 | Local Epochs : 5 | 32 images	Loss: 0.976751
+Run Time: 64.5228
+
+Weight averaging
+Global model weights save to checkpoint
+Testing global model on 100 users
+
+Avg Training Stats after 5 global rounds:
+Training Loss : 2.0188329043146225
+Local Test Accuracy: 67.84% 
+Local Test IoU: nan%
+Run Time: 368.2542
+
+
+ | Global Training Round : 6 |
+
+
+User idx : 80
+| Global Round : 5 | Local Epochs : 5 | 32 images	Loss: 1.431470
+Run Time: 60.3109
+
+User idx : 58
+| Global Round : 5 | Local Epochs : 5 | 32 images	Loss: 1.492138
+Run Time: 60.1568
+
+User idx : 68
+| Global Round : 5 | Local Epochs : 5 | 32 images	Loss: 0.966808
+Run Time: 60.4817
+
+User idx : 16
+| Global Round : 5 | Local Epochs : 5 | 32 images	Loss: 1.738511
+Run Time: 60.4816
+
+User idx : 4
+| Global Round : 5 | Local Epochs : 5 | 32 images	Loss: 2.303917
+Run Time: 60.4390
+
+User idx : 19
+| Global Round : 5 | Local Epochs : 5 | 32 images	Loss: 1.157400
+Run Time: 62.0410
+
+User idx : 46
+| Global Round : 5 | Local Epochs : 5 | 32 images	Loss: 1.260472
+Run Time: 62.1073
+
+User idx : 34
+| Global Round : 5 | Local Epochs : 5 | 32 images	Loss: 2.165317
+Run Time: 62.2762
+
+User idx : 11
+| Global Round : 5 | Local Epochs : 5 | 32 images	Loss: 1.910694
+Run Time: 62.4221
+
+User idx : 64
+| Global Round : 5 | Local Epochs : 5 | 32 images	Loss: 1.817060
+Run Time: 64.9471
+
+Weight averaging
+Global model weights save to checkpoint
+Testing global model on 100 users
+
+Avg Training Stats after 6 global rounds:
+Training Loss : 2.0845352413109506
+Local Test Accuracy: 64.62% 
+Local Test IoU: nan%
+Run Time: 376.2745
+
+
+ | Global Training Round : 7 |
+
+
+User idx : 83
+| Global Round : 6 | Local Epochs : 5 | 32 images	Loss: 0.814539
+Run Time: 60.3331
+
+User idx : 71
+| Global Round : 6 | Local Epochs : 5 | 32 images	Loss: 3.498947
+Run Time: 60.4675
+
+User idx : 47
+| Global Round : 6 | Local Epochs : 5 | 32 images	Loss: 1.158291
+Run Time: 60.6505
+
+User idx : 82
+| Global Round : 6 | Local Epochs : 5 | 32 images	Loss: 1.234634
+Run Time: 60.4947
+
+User idx : 64
+| Global Round : 6 | Local Epochs : 5 | 32 images	Loss: 0.687684
+Run Time: 60.5658
+
+User idx : 31
+| Global Round : 6 | Local Epochs : 5 | 32 images	Loss: 1.420778
+Run Time: 62.3301
+
+User idx : 57
+| Global Round : 6 | Local Epochs : 5 | 32 images	Loss: 2.560684
+Run Time: 62.4836
+
+User idx : 30
+| Global Round : 6 | Local Epochs : 5 | 32 images	Loss: 1.089538
+Run Time: 62.5752
+
+User idx : 94
+| Global Round : 6 | Local Epochs : 5 | 32 images	Loss: 2.327333
+Run Time: 62.3674
+
+User idx : 19
+| Global Round : 6 | Local Epochs : 5 | 32 images	Loss: 2.362061
+Run Time: 64.8349
+
+Weight averaging
+Global model weights save to checkpoint
+Testing global model on 100 users
+
+Avg Training Stats after 7 global rounds:
+Training Loss : 2.0795759278442714
+Local Test Accuracy: 82.25% 
+Local Test IoU: nan%
+Run Time: 415.7523
+
+
+ | Global Training Round : 8 |
+
+
+User idx : 31
+| Global Round : 7 | Local Epochs : 5 | 32 images	Loss: 0.448529
+Run Time: 60.1623
+
+User idx : 89
+| Global Round : 7 | Local Epochs : 5 | 32 images	Loss: 1.623353
+Run Time: 60.6215
+
+User idx : 19
+| Global Round : 7 | Local Epochs : 5 | 32 images	Loss: 2.031455
+Run Time: 60.7841
+
+User idx : 75
+| Global Round : 7 | Local Epochs : 5 | 32 images	Loss: 0.571009
+Run Time: 60.6779
+
+User idx : 47
+| Global Round : 7 | Local Epochs : 5 | 32 images	Loss: 1.966306
+Run Time: 61.1078
+
+User idx : 62
+| Global Round : 7 | Local Epochs : 5 | 32 images	Loss: 0.519636
+Run Time: 62.3447
+
+User idx : 8
+| Global Round : 7 | Local Epochs : 5 | 32 images	Loss: 2.218219
+Run Time: 62.4353
+
+User idx : 28
+| Global Round : 7 | Local Epochs : 5 | 32 images	Loss: 0.993801
+Run Time: 62.3342
+
+User idx : 57
+| Global Round : 7 | Local Epochs : 5 | 32 images	Loss: 4.285297
+Run Time: 62.5126
+
+User idx : 49
+| Global Round : 7 | Local Epochs : 5 | 32 images	Loss: 2.138342
+Run Time: 64.9518
+
+Weight averaging
+Global model weights save to checkpoint
+Testing global model on 100 users
+
+Avg Training Stats after 8 global rounds:
+Training Loss : 2.0540019484260124
+Local Test Accuracy: 30.36% 
+Local Test IoU: nan%
+Run Time: 370.7115
+
+
+ | Global Training Round : 9 |
+
+
+User idx : 33
+| Global Round : 8 | Local Epochs : 5 | 32 images	Loss: 0.768498
+Run Time: 60.0492
+
+User idx : 34
+| Global Round : 8 | Local Epochs : 5 | 32 images	Loss: 2.618331
+Run Time: 60.7483
+
+User idx : 26
+| Global Round : 8 | Local Epochs : 5 | 32 images	Loss: 0.714720
+Run Time: 60.5155
+
+User idx : 27
+| Global Round : 8 | Local Epochs : 5 | 32 images	Loss: 0.992025
+Run Time: 60.4658
+
+User idx : 65
+| Global Round : 8 | Local Epochs : 5 | 32 images	Loss: 1.376931
+Run Time: 60.5935
+
+User idx : 57
+| Global Round : 8 | Local Epochs : 5 | 32 images	Loss: 1.390421
+Run Time: 62.4277
+
+User idx : 41
+| Global Round : 8 | Local Epochs : 5 | 32 images	Loss: 5.635899
+Run Time: 62.1447
+
+User idx : 94
+| Global Round : 8 | Local Epochs : 5 | 32 images	Loss: 0.408535
+Run Time: 62.4780
+
+User idx : 55
+| Global Round : 8 | Local Epochs : 5 | 32 images	Loss: 3.811454
+Run Time: 62.3931
+
+User idx : 68
+| Global Round : 8 | Local Epochs : 5 | 32 images	Loss: 0.420901
+Run Time: 64.9742
+
+Weight averaging
+Global model weights save to checkpoint
+Testing global model on 100 users
+
+Avg Training Stats after 9 global rounds:
+Training Loss : 2.0730065539100075
+Local Test Accuracy: 66.11% 
+Local Test IoU: nan%
+Run Time: 388.5292
+
+
+ | Global Training Round : 10 |
+
+
+User idx : 16
+| Global Round : 9 | Local Epochs : 5 | 32 images	Loss: 1.806565
+Run Time: 60.1901
+
+User idx : 19
+| Global Round : 9 | Local Epochs : 5 | 32 images	Loss: 0.630195
+Run Time: 60.3258
+
+User idx : 44
+| Global Round : 9 | Local Epochs : 5 | 32 images	Loss: 1.387979
+Run Time: 60.4452
+
+User idx : 77
+| Global Round : 9 | Local Epochs : 5 | 32 images	Loss: 1.381726
+Run Time: 60.5277
+
+User idx : 26
+| Global Round : 9 | Local Epochs : 5 | 32 images	Loss: 1.382902
+Run Time: 60.5964
+
+User idx : 37
+| Global Round : 9 | Local Epochs : 5 | 32 images	Loss: 1.308598
+Run Time: 62.2367
+
+User idx : 30
+| Global Round : 9 | Local Epochs : 5 | 32 images	Loss: 0.987653
+Run Time: 62.1535
+
+User idx : 84
+| Global Round : 9 | Local Epochs : 5 | 32 images	Loss: 3.432634
+Run Time: 62.1272
+
+User idx : 27
+| Global Round : 9 | Local Epochs : 5 | 32 images	Loss: 1.168658
+Run Time: 62.4804
+
+User idx : 65
+| Global Round : 9 | Local Epochs : 5 | 32 images	Loss: 0.964490
+Run Time: 64.9124
+
+Weight averaging
+Global model weights save to checkpoint
+Testing global model on 100 users
+
+Avg Training Stats after 10 global rounds:
+Training Loss : 2.0680242500844184
+Local Test Accuracy: 69.90% 
+Local Test IoU: nan%
+Run Time: 379.8233
+
+
+Testing global model on global test dataset
+
+Results after 10 global rounds of training:
+|---- Global Test Accuracy: 64.56%
+|---- Global Test IoU: 0.80%
+
+ Total Run Time: 9144.4708

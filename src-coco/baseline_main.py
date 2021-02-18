@@ -6,6 +6,7 @@ import os
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
+import time
 
 from tqdm import tqdm
 import torch
@@ -93,13 +94,16 @@ if __name__ == '__main__':
                     'model_name': args.model
                 },
                 os.path.join(args.root, 'save/checkpoints', '{}_auxlr{}_lr{}_{}_ep{}.pth'.format(args.model, args.aux_lr_param, args.lr, args.lr_scheduler, epoch)))
-    print('training ends')
+    print('Training ends')
     
+    print('Testing:')
+    timer = time.time()
     if not args.train_only:
         confmat = evaluate(global_model, test_loader, device, num_classes=args.num_classes)
         print(confmat)
         lines.append('Confusion matrix on test dataset: ')
         lines.append(str(confmat))
+    print('Test time: ', time.time() - timer)
 
 
     # logging

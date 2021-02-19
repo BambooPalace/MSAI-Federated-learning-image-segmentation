@@ -95,9 +95,9 @@ if __name__ == '__main__':
         # update global weights
         global_model.load_state_dict(global_weights)
         # save global model to checkpoint
-        exp_name = 'fed_{}_{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}]_lr[{}]_{}'.\
+        exp_name = 'fed_{}_{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}]_lr[{}]_{}_{}'.\
                     format(args.dataset, args.model, epoch+1, args.frac, args.iid, \
-                        args.unequal, args.local_ep, args.local_bs, args.lr, args.lr_scheduler)
+                        args.unequal, args.local_ep, args.local_bs, args.lr, args.lr_scheduler, args.optimizer)
         if epoch % args.save_frequency == 0 or epoch == args.epochs-1:
             torch.save(
                 {

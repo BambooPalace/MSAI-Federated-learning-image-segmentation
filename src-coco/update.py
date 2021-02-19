@@ -76,8 +76,8 @@ class LocalUpdate(object):
                                         weight_decay=1e-4)
 
         scheduler_dict = {
-            'step': torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1),
-            'lambda':torch.optim.lr_scheduler.LambdaLR(optimizer, lambda x: (1 - x / (len(self.trainloader)*max(1,args.epochs))) ** 0.9)
+            'step': torch.optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.5),
+            'lambda':torch.optim.lr_scheduler.LambdaLR(optimizer, lambda x: (1 - x / (len(self.trainloader)*max(1,args.local_ep))) ** 0.9)
         }
         lr_scheduler = scheduler_dict[args.lr_scheduler]                                                                                 
 

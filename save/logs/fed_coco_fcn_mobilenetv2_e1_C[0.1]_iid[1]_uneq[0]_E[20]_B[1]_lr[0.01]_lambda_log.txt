@@ -1,0 +1,67 @@
+Options:
+Namespace(aux_lr_param=2, checkpoint=None, cpu_only=False, dataset='coco', epochs=1, frac=0.1, iid=1, kernel_num=9, kernel_sizes='3,4,5', local_bs=1, local_ep=20, lr=0.01, lr_scheduler='lambda', max_pool='True', model='fcn_mobilenetv2', momentum=0.9, norm='batch_norm', num_channels=1, num_classes=81, num_filters=32, num_users=100, num_workers=1, optimizer='sgd', root='./', save_frequency=1, seed=1, stopping_rounds=10, train_only=False, unequal=0, verbose=0)
+device: cuda
+
+Training global model on 0.1 of 100 users locally for 1 epochs
+
+ | Global Training Round : 1 |
+
+
+User idx : 50
+| Global Round : 0 | Local Epochs : 20 | 32 images	Loss: 2.323081
+Run Time: 246.8748
+
+User idx : 61
+| Global Round : 0 | Local Epochs : 20 | 32 images	Loss: 2.413411
+Run Time: 241.2843
+
+User idx : 44
+| Global Round : 0 | Local Epochs : 20 | 32 images	Loss: 0.931002
+Run Time: 239.3839
+
+User idx : 20
+| Global Round : 0 | Local Epochs : 20 | 32 images	Loss: 0.989578
+Run Time: 239.9636
+
+User idx : 53
+| Global Round : 0 | Local Epochs : 20 | 32 images	Loss: 5.356009
+Run Time: 240.1670
+
+User idx : 68
+| Global Round : 0 | Local Epochs : 20 | 32 images	Loss: 1.192215
+Run Time: 239.8502
+
+User idx : 21
+| Global Round : 0 | Local Epochs : 20 | 32 images	Loss: 1.977056
+Run Time: 240.9680
+
+User idx : 66
+| Global Round : 0 | Local Epochs : 20 | 32 images	Loss: 3.240845
+Run Time: 240.4210
+
+User idx : 85
+| Global Round : 0 | Local Epochs : 20 | 32 images	Loss: 0.615532
+Run Time: 241.1874
+
+User idx : 94
+| Global Round : 0 | Local Epochs : 20 | 32 images	Loss: 0.885763
+Run Time: 241.1540
+
+Weight averaging
+Global model weights save to checkpoint
+Testing global model on 100 users
+
+Avg Training Stats after 1 global rounds:
+Training Loss : 2.529759615268558
+Local Test Accuracy: 49.21% 
+Local Test IoU: nan%
+Run Time: 374.2937
+
+
+Testing global model on global test dataset
+
+Results after 1 global rounds of training:
+|---- Global Test Accuracy: 64.57%
+|---- Global Test IoU: 0.80%
+
+ Total Run Time: 3749.7045

@@ -114,10 +114,11 @@ if __name__ == '__main__':
 
         # Calculate avg test accuracy over all users at every epoch
         last_time = time.time()
-        print_log('Testing global model on {} users'.format(args.num_users))
+        print_log('Testing global model on {} users'.format(args.num_users/2))
         list_acc, list_iou = [], []
         global_model.eval()
-        for c in tqdm(range(args.num_users)):
+        
+        for c in tqdm(range(args.num_users/2)):
             local_model = LocalUpdate(args=args, dataset=train_dataset,
                                       idxs=user_groups[idx])            
             acc, iou = local_model.inference(model=global_model)

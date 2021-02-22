@@ -27,7 +27,7 @@ def get_dataset(args):
         path2ann = r"C:\Users\cgong002\Google Drive\data\coco\annotations\instances_val2017.json"
         
         if args.num_classes == 81:
-        catIds = random_n_classes(args.num_classes)
+            catIds = random_n_classes(args.num_classes)
         elif args.num_classes == 21:
             catIds = [0, 5, 2, 16, 9, 44, 6, 3, 17, 62, 21, 67, 18, 19, 4, 1, 64, 20, 63, 7, 72]
         train_dataset = datasets.CocoDetection(path2data, path2ann, transforms=Compose([FilterAndRemapCocoCategories(catIds, remap=True), 

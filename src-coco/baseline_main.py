@@ -90,10 +90,10 @@ if __name__ == '__main__':
                     'model': global_model.state_dict(),
                     'optimizer': optimizer.state_dict(),
                     'lr_scheduler': lr_scheduler.state_dict(),
-                    'epoch': epoch,
+                    'epoch': epoch+1,
                     'model_name': args.model
                 },
-                os.path.join(args.root, 'save/checkpoints', '{}_auxlr{}_lr{}_{}_ep{}.pth'.format(args.model, args.aux_lr_param, args.lr, args.lr_scheduler, epoch)))
+                os.path.join(args.root, 'save/checkpoints', '{}_auxlr{}_lr{}_{}_ep{}.pth'.format(args.model, args.aux_lr_param, args.lr, args.lr_scheduler, epoch+1)))
     print('Training ends')
     
     print('Testing:')

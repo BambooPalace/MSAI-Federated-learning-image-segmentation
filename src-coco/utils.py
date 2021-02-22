@@ -9,7 +9,7 @@ from torchvision import datasets
 
 from transforms import Compose
 from train import get_transform
-from coco_utils import ConvertCocoPolysToMask, FilterAndRemapCocoCategories
+from coco_utils import ConvertCocoPolysToMask, FilterAndRemapCocoCategories, random_n_classes
 from sampling import *
 
 
@@ -25,10 +25,11 @@ def get_dataset(args):
         # path2ann = os.path.join(args.root, 'data/coco/annotations/instances_val2017.json')
         path2data = r"C:\Users\cgong002\Google Drive\data\coco\val2017" #use single quotes seems to cause error
         path2ann = r"C:\Users\cgong002\Google Drive\data\coco\annotations\instances_val2017.json"
-
-        untransformed_data = datasets.CocoDetection(path2data, path2ann)
-        catIds = untransformed_data.coco.getCatIds()
-        catIds.insert(0,0)
+        
+        if args.num_classes == 81:
+        catIds = random_n_classes(args.num_classes)
+        elif args.num_classes == 21:
+            catIds = [0, 5, 2, 16, 9, 44, 6, 3, 17, 62, 21, 67, 18, 19, 4, 1, 64, 20, 63, 7, 72]
         train_dataset = datasets.CocoDetection(path2data, path2ann, transforms=Compose([FilterAndRemapCocoCategories(catIds, remap=True), 
                                                                                     ConvertCocoPolysToMask(),
                                                                                     get_transform(train=True)]))

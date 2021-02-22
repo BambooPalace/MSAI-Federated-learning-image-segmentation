@@ -118,7 +118,7 @@ if __name__ == '__main__':
         list_acc, list_iou = [], []
         global_model.eval()
         
-        for c in tqdm(range(args.num_users/2)):
+        for c in tqdm(range(args.num_users//2)):
             local_model = LocalUpdate(args=args, dataset=train_dataset,
                                       idxs=user_groups[idx])            
             acc, iou = local_model.inference(model=global_model)

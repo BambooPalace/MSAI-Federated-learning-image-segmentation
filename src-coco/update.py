@@ -129,5 +129,4 @@ def test_inference(args, model, testloader):
     """
     device = 'cuda' if torch.cuda.is_available() and not args.cpu_only else 'cpu'
     confmat = evaluate(model, testloader, device, args.num_classes)
-    print(confmat)
-    return confmat.acc_global, confmat.iou_mean
+    return confmat.acc_global, confmat.iou_mean, str(confmat)

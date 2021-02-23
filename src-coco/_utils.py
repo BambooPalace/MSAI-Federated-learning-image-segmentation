@@ -6,6 +6,7 @@ import torch.distributed as dist
 
 import errno
 import os
+import math
 
 
 class SmoothedValue(object):
@@ -76,8 +77,8 @@ class ConfusionMatrix(object):
         self.mat = None
         self.acc_global = 0
         self.iou_mean = 0
-        self.acc = None
-        self.iu = None
+        self.acc = 0
+        self.iu = 0
 
     def update(self, a, b):
         n = self.num_classes
@@ -98,7 +99,9 @@ class ConfusionMatrix(object):
         self.acc_global = self.acc_global.item()*100
         self.acc = torch.diag(h) / h.sum(1)
         self.iu = torch.diag(h) / (h.sum(1) + h.sum(0) - torch.diag(h))
-        self.iou_mean = self.iu.mean().item()*100
+        # remove nan for calculating mean value
+        iu = self.iu[~self.iu.isnan()]
+        self.iou_mean = iu.mean().item()*100
         # return acc_global, acc, iu
 
     def reduce_from_all_processes(self):

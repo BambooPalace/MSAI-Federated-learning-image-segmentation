@@ -114,11 +114,11 @@ if __name__ == '__main__':
 
         # Calculate avg test accuracy over all users at every epoch
         last_time = time.time()
-        print_log('Testing global model on {} users'.format(args.num_users/2))
+        print_log('Testing global model on {} users'.format(args.num_users))
         list_acc, list_iou = [], []
         global_model.eval()
         
-        for c in tqdm(range(args.num_users//2)):
+        for c in tqdm(range(args.num_users)):
             local_model = LocalUpdate(args=args, dataset=train_dataset,
                                       idxs=user_groups[idx])            
             acc, iou = local_model.inference(model=global_model)
@@ -139,30 +139,31 @@ if __name__ == '__main__':
     # Inference on test dataset after completion of training
     if not args.train_only:
         print_log('\nTesting global model on global test dataset')
-        test_acc, test_iou = test_inference(args, global_model, test_loader)
-
+        test_acc, test_iou, confmat = test_inference(args, global_model, test_loader)
+        print_log(confmat)
         print_log('\nResults after {} global rounds of training:'.format(args.epochs))
         print_log("|---- Global Test Accuracy: {:.2f}%".format(test_acc))
         print_log("|---- Global Test IoU: {:.2f}%".format(test_iou))
         print_log('\n Total Run Time: {0:0.4f}'.format(time.time()-start_time))
 
     # Plot Loss curve
-    plt.figure()
-    plt.title('Training Loss vs Communication rounds')
-    plt.plot(range(len(train_loss)), train_loss, color='r')
-    plt.ylabel('Training loss')
-    plt.xlabel('Communication Rounds')
-    plt.savefig(os.path.join(args.root, 'save/training_curves', exp_name+'_loss.png'))
+    if args.epochs > 1:
+        plt.figure()
+        plt.title('Training Loss vs Communication rounds')
+        plt.plot(range(len(train_loss)), train_loss, color='r')
+        plt.ylabel('Training loss')
+        plt.xlabel('Communication Rounds')
+        plt.savefig(os.path.join(args.root, 'save/training_curves', exp_name+'_loss.png'))
 
-    # Plot Average Accuracy vs Communication rounds
-    plt.figure()
-    plt.title('Average Accuracy vs Communication rounds')
-    plt.plot(range(len(local_test_accuracy)), local_test_accuracy, color='k', label='local test accuracy')
-    plt.plot(range(len(local_test_iou)), local_test_iou, color='b', label='local test IoU')
-    plt.ylabel('Average Accuracy')
-    plt.xlabel('Communication Rounds')
-    plt.legend()
-    plt.savefig(os.path.join(args.root, 'save/training_curves', exp_name+'_metrics.png'))
+        # Plot Average Accuracy vs Communication rounds
+        plt.figure()
+        plt.title('Average Accuracy vs Communication rounds')
+        plt.plot(range(len(local_test_accuracy)), local_test_accuracy, color='k', label='local test accuracy')
+        plt.plot(range(len(local_test_iou)), local_test_iou, color='b', label='local test IoU')
+        plt.ylabel('Average Accuracy')
+        plt.xlabel('Communication Rounds')
+        plt.legend()
+        plt.savefig(os.path.join(args.root, 'save/training_curves', exp_name+'_metrics.png'))
 
     # Logging
     filename = os.path.join(args.root, 'save/logs', exp_name+'_log.txt')

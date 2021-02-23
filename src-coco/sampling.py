@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Python version: 3.6
-
+import os
 import time
 import numpy as np
 from torchvision import datasets, transforms
@@ -55,7 +55,10 @@ def coco_noniid(dataset, num_users):
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}
     idxs = np.arange(num_shards*num_imgs)
-    labels = convert_coco_mask_to_top_class(dataset)
+    if os.path.exists('./save/labels.pt'):
+        labels = torch.load('./save/labels.pt')
+    else:
+        labels = convert_coco_mask_to_top_class(dataset)[:num_shards*num_imgs]
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
     idxs_labels = idxs_labels[:, idxs_labels[1, :].argsort()]
@@ -68,7 +71,7 @@ def coco_noniid(dataset, num_users):
         for rand in rand_set:
             dict_users[i] = np.concatenate(
                 (dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]), axis=0)
-    print('Time consumed to get user indices: ', time.time()-timer)
+    print('Time consumed to get user indices: ', (time.time()-timer)//60)
     return dict_users
 
 def coco_noniid_unequal(dataset, num_users):
@@ -87,9 +90,10 @@ def coco_noniid_unequal(dataset, num_users):
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}
     idxs = np.arange(num_shards*num_imgs)
-    labels = convert_coco_mask_to_top_class(dataset)
-
-    # sort labels
+    if os.path.exists('./save/labels.pt'):
+        labels = torch.load('./save/labels.pt')
+    else:
+        labels = convert_coco_mask_to_top_class(dataset)[:num_shards*num_imgs]    # sort labels
     idxs_labels = np.vstack((idxs, labels))
     idxs_labels = idxs_labels[:, idxs_labels[1, :].argsort()]
     idxs = idxs_labels[0, :]
@@ -159,5 +163,5 @@ def coco_noniid_unequal(dataset, num_users):
                 dict_users[k] = np.concatenate(
                     (dict_users[k], idxs[rand*num_imgs:(rand+1)*num_imgs]),
                     axis=0)
-    print('Time consumed to get user indices: ', time.time()-timer)
+    print('Time consumed to get user indices: ', (time.time()-timer)//60)
     return dict_users

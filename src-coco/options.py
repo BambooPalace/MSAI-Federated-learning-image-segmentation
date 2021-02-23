@@ -69,6 +69,6 @@ def args_parser():
     parser.add_argument('--root', type=str, default='./', help='home directory')
     parser.add_argument('--train_only', action='store_true')
     parser.add_argument('--data', type=str, default='val2017', choices=['val2017', 'train2017'], help='val has 5k images while train has 118k')
-    parser.add_argument('--local_test_frac', default=1, type=int, help='frac of num_users for local testing')
+    parser.add_argument('--local_test_frac', default=1.0, type=float, help='frac of num_users for local testing')
     args = parser.parse_args()
     return args

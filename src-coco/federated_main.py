@@ -114,7 +114,7 @@ if __name__ == '__main__':
 
         # Calculate avg test accuracy over all users at every epoch
         last_time = time.time()
-        test_users = args.local_test_frac  *args.num_users
+        test_users = int(args.local_test_frac * args.num_users)
         print_log('Testing global model on {} users'.format(test_users))
         list_acc, list_iou = [], []
         global_model.eval()
@@ -134,7 +134,7 @@ if __name__ == '__main__':
             print_log('Training Loss : {}'.format(np.mean(np.array(train_loss))))
             print_log('Local Test Accuracy: {:.2f}% '.format(local_test_accuracy[-1]))
             print_log('Local Test IoU: {:.2f}%'.format(local_test_iou[-1]))
-            print_log('Run Time: {0:0.4f}\n'.format(time.time()-last_time))
+            print_log('Run Time: {0:0.4f}\n'.format((time.time()-last_time)//60))
 
 
     # Inference on test dataset after completion of training
@@ -145,7 +145,7 @@ if __name__ == '__main__':
         print_log('\nResults after {} global rounds of training:'.format(args.epochs))
         print_log("|---- Global Test Accuracy: {:.2f}%".format(test_acc))
         print_log("|---- Global Test IoU: {:.2f}%".format(test_iou))
-        print_log('\n Total Run Time: {0:0.4f}'.format(time.time()-start_time))
+        print_log('\n Total Run Time: {0:0.4f}'.format((time.time()-start_time)//60))
 
     # Plot Loss curve
     if args.epochs > 1:

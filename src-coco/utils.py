@@ -77,6 +77,7 @@ def average_weights(w):
 def exp_details(args):
     print('\nExperimental details:')
     print(f'    Model     : {args.model}')
+    print(f'    No of classes     : {args.num_classes}')
     print(f'    Optimizer : {args.optimizer}')
     print(f'    Learning  : {args.lr}')
     print(f'    Global Rounds   : {args.epochs}\n')
@@ -86,6 +87,8 @@ def exp_details(args):
         print('    IID')
     else:
         print('    Non-IID')
+        if args.unequal:
+            print(' Unequal')
     print(f'    Fraction of users  : {args.frac}')
     print(f'    Local Batch size   : {args.local_bs}')
     print(f'    Local Epochs       : {args.local_ep}\n')

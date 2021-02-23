@@ -21,10 +21,15 @@ def get_dataset(args):
     """
 
     if args.dataset == 'coco':
-        # path2data = os.path.join(args.root, 'data/coco/val2017')
-        # path2ann = os.path.join(args.root, 'data/coco/annotations/instances_val2017.json')
-        path2data = r"C:\Users\cgong002\Google Drive\data\coco\val2017" #use single quotes seems to cause error
-        path2ann = r"C:\Users\cgong002\Google Drive\data\coco\annotations\instances_val2017.json"
+        if args.data == 'val2017':
+            path2data = os.path.join(args.root, 'data/coco/val2017')
+            path2ann = os.path.join(args.root, 'data/coco/annotations/instances_val2017.json')
+        elif args.data == 'train2017':
+            path2data = os.path.join(args.root, 'data/coco/train2017')
+            path2ann = os.path.join(args.root, 'data/coco/annotations/instances_train2017.json')        
+    
+        # path2data = r"C:\Users\cgong002\Google Drive\data\coco\val2017" #local
+        # path2ann = r"C:\Users\cgong002\Google Drive\data\coco\annotations\instances_val2017.json" #local
         
         if args.num_classes == 81:
             catIds = random_n_classes(args.num_classes)
@@ -38,7 +43,7 @@ def get_dataset(args):
                                                                             get_transform(train=False)]))
         # split train and test indice
         torch.manual_seed(args.seed)
-        split_idx=4000
+        split_idx=len(train_dataset)//5 * 4
         idxs = torch.randperm(len(train_dataset)).tolist()
         train_dataset = torch.utils.data.Subset(train_dataset, idxs[:split_idx])
         test_dataset = torch.utils.data.Subset(test_dataset, idxs[split_idx:])

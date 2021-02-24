@@ -56,10 +56,10 @@ def get_dataset(args):
             # Sample Non-IID user data from Mnist
             if args.unequal:
                 # Chose uneuqal splits for every user
-                user_groups = coco_noniid_unequal(train_dataset, args.num_users)
+                user_groups = coco_noniid_unequal(train_dataset, args.num_users, data=args.data)
             else:
                 # Chose euqal splits for every user
-                user_groups = coco_noniid(train_dataset, args.num_users)
+                user_groups = coco_noniid(train_dataset, args.num_users, data=args.data)
 
     else:
         exit('Unrecognized dataset')

@@ -4,6 +4,7 @@
 import os
 import time
 import numpy as np
+import torch
 from torchvision import datasets, transforms
 
 
@@ -41,7 +42,7 @@ def coco_iid(dataset, num_users):
         all_idxs = list(set(all_idxs) - dict_users[i])
     return dict_users
 
-def coco_noniid(dataset, num_users):
+def coco_noniid(dataset, num_users, data):
     """
     Sample non-I.I.D client data from MNIST dataset
     :param dataset:
@@ -50,31 +51,35 @@ def coco_noniid(dataset, num_users):
     """
     timer = time.time()
     # 4,000 training imgs -->  200 shards
-    num_shards = 200
+    num_shards = 200 if data == 'val2017' else 2000 # default 200
     num_imgs = len(dataset) // num_shards 
     idx_shard = [i for i in range(num_shards)]
-    dict_users = {i: np.array([]) for i in range(num_users)}
-    idxs = np.arange(num_shards*num_imgs)
-    if os.path.exists('./save/labels.pt'):
-        labels = torch.load('./save/labels.pt')
+    dict_users = {i: np.array([]) for i in range(num_users)}    
+    total_shards = num_shards * num_imgs
+    idxs = np.arange(total_shards)
+    labels_path = './save/labels{}.pt'.format(data)
+    if os.path.exists(labels_path):
+        labels = torch.load(labels_path)[:total_shards]
     else:
-        labels = convert_coco_mask_to_top_class(dataset)[:num_shards*num_imgs]
+        labels = convert_coco_mask_to_top_class(dataset)[:total_shards]
+        torch.save(labels, labels_path)
     # sort labels
     idxs_labels = np.vstack((idxs, labels))
     idxs_labels = idxs_labels[:, idxs_labels[1, :].argsort()]
     idxs = idxs_labels[0, :]
 
     # divide and assign 2 shards/client
-    for i in range(num_users):
+    for i in range(num_users):        
         rand_set = set(np.random.choice(idx_shard, 2, replace=False))
         idx_shard = list(set(idx_shard) - rand_set)
         for rand in rand_set:
             dict_users[i] = np.concatenate(
                 (dict_users[i], idxs[rand*num_imgs:(rand+1)*num_imgs]), axis=0)
     print('Time consumed to get user indices: ', (time.time()-timer)//60)
+    # torch.save(dict_users, './save/dict_users.pt') # save to check
     return dict_users
 
-def coco_noniid_unequal(dataset, num_users):
+def coco_noniid_unequal(dataset, num_users, data):
     """
     Sample non-I.I.D client data from MNIST dataset s.t clients
     have unequal amount of data
@@ -85,15 +90,19 @@ def coco_noniid_unequal(dataset, num_users):
     """
     timer = time.time()
     # 4000 training imgs --> 1000 shards
-    num_shards = 1000
+    num_shards = 1000 if data == 'val2017' else 10000 # default 1000
     num_imgs = len(dataset) // num_shards
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}
-    idxs = np.arange(num_shards*num_imgs)
-    if os.path.exists('./save/labels.pt'):
-        labels = torch.load('./save/labels.pt')
+    total_shards = num_shards * num_imgs
+    idxs = np.arange(total_shards)
+    labels_path = './save/labels{}.pt'.format(data)
+    if os.path.exists(labels_path):
+        labels = torch.load(labels_path)[:total_shards]
     else:
-        labels = convert_coco_mask_to_top_class(dataset)[:num_shards*num_imgs]    # sort labels
+        labels = convert_coco_mask_to_top_class(dataset)[:total_shards]
+        torch.save(labels, labels_path)
+    # sort labels
     idxs_labels = np.vstack((idxs, labels))
     idxs_labels = idxs_labels[:, idxs_labels[1, :].argsort()]
     idxs = idxs_labels[0, :]

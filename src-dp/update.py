@@ -85,23 +85,24 @@ class LocalUpdate(object):
         elif args.optimizer == 'adam':
             optimizer = torch.optim.Adam(params_to_optimize, lr=args.lr,
                                         weight_decay=1e-4)
-
-        scheduler_dict = {
-            'step': torch.optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.5),
-            'lambda':torch.optim.lr_scheduler.LambdaLR(optimizer, lambda x: (1 - x / (len(self.trainloader)*max(1,args.local_ep))) ** 0.9)
-        }
-        lr_scheduler = scheduler_dict[args.lr_scheduler]    
+        #PRIVACY ENGINE
         if args.dp:
             privacy_engine = PrivacyEngine(
                 model,
-                batch_size = args.local_bs,
-                sample_size = len(self.trainloader)*args.local_bs,
+                # batch_size = args.local_bs,
+                # sample_size = len(self.trainloader)*args.local_bs,
                 sample_rate = 1 / len(self.trainloader),   
                 alphas = DEFAULT_ALPHAS,
                 noise_multiplier=NOISE_MULTIPLIER,
                 max_grad_norm=MAX_GRAD_NORM,
             )
-            privacy_engine.attach(optimizer)                                                                             
+            privacy_engine.attach(optimizer)   
+
+        scheduler_dict = {
+            'step': torch.optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.5),
+            'lambda':torch.optim.lr_scheduler.LambdaLR(optimizer, lambda x: (1 - x / (len(self.trainloader)*max(1,args.local_ep))) ** 0.9)
+        }
+        lr_scheduler = scheduler_dict[args.lr_scheduler]                                                                             
 
         # training
         start_time = time.time()
@@ -109,7 +110,7 @@ class LocalUpdate(object):
             batch_loss = []
             for batch_idx, (images, labels) in enumerate(self.trainloader):
                 images, labels = images.to(self.device), labels.to(self.device)
-                print(f'image tensor size is {images.size()}')
+                # print(f'image tensor size is {images.size()}')
 
                 model.zero_grad()
                 log_probs = model(images)
@@ -123,11 +124,11 @@ class LocalUpdate(object):
             lr_scheduler.step()
             if args.dp:
                 epsilon, best_alpha = optimizer.privacy_engine.get_privacy_spent(DELTA)          
-                print_log(f'local epoch: {iter}, epsilon={epsilon:.2f}, delta={DELTA}')  
+                print_log(f'local epoch: {iter}, epsilon={epsilon:.2f}, delta={DELTA}')                  
 
             if self.args.verbose:
                 string = '| Global Round : {} | Local Epoch : {} | {} images\tLoss: {:.6f}'.format(
-                    global_round, iter, len(self.trainloader.dataset),loss.item())
+                    global_round, iter+1, len(self.trainloader.dataset),loss.item())
                 print_log(string)            
 
         # after training, print logs

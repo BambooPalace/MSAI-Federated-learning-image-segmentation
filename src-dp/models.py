@@ -168,6 +168,7 @@ def _batchnorm_to_instancenorm(module: nn.modules.batchnorm._BatchNorm) -> nn.Mo
         if isinstance(module, nn.BatchNorm1d):
             return nn.InstanceNorm1d
         elif isinstance(module, nn.BatchNorm2d):
+            print(module.num_features)
             return nn.InstanceNorm2d
         elif isinstance(module, nn.BatchNorm3d):
             return nn.InstanceNorm3d
@@ -191,8 +192,10 @@ def _batchnorm_to_groupnorm(module: nn.modules.batchnorm._BatchNorm) -> nn.Modul
         paper *Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour*
         https://arxiv.org/pdf/1706.02677.pdf
     """
-    # return nn.GroupNorm(min(32, module.num_features), module.num_features, affine=True)
-    return nn.GroupNorm(1, module.num_features, affine=True)
+    # print(module.num_features) #NOT PRINTING
+    # use 8 instead of 32, as 8 is the maximum divisor of channel numbers
+    return nn.GroupNorm(min(8, module.num_features), module.num_features, affine=True)
+
 
 
 def nullify_batchnorm_modules(root: nn.Module) -> nn.Module:
@@ -220,7 +223,7 @@ def convert_batchnorm_modules(
     model: nn.Module,
     converter: Callable[
         [nn.modules.batchnorm._BatchNorm], nn.Module
-    ] = _batchnorm_to_instancenorm, #_batchnorm_to_groupnorm,
+    ] = _batchnorm_to_groupnorm, #_batchnorm_to_instancenorm
 ) -> nn.Module:
     """
     Converts all BatchNorm modules to another module

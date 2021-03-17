@@ -6,3 +6,4 @@ tensorboardx==1.4
 matplotlib==3.0.1
 tqdm
 pycocotools
+opacus

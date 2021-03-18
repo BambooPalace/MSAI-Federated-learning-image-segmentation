@@ -10,8 +10,8 @@ from train import criterion, evaluate
 
 from opacus import PrivacyEngine
 
-MAX_GRAD_NORM = 1.2
 NOISE_MULTIPLIER = 0.38
+MAX_GRAD_NORM = 1.2
 DELTA = 1e-5
 DEFAULT_ALPHAS = [1 + x / 10.0 for x in range(1, 100)] + list(range(12, 64))
 
@@ -52,7 +52,7 @@ class LocalUpdate(object):
 
         # mod1: add num_workers, to see if can speed up training. ANS is no for cifar
         trainloader = DataLoader(DatasetSplit(dataset, idxs_train),
-                                 batch_size=self.args.virtual_bs, num_workers=self.args.num_workers, shuffle=True)
+                                 batch_size=self.args.virtual_bs, num_workers=self.args.num_workers, shuffle=True, drop_last=True)
         testloader = DataLoader(DatasetSplit(dataset, idxs_test),
                                 batch_size=max(len(idxs_test)//10,1), num_workers=self.args.num_workers, shuffle=False)
         return trainloader, testloader
@@ -94,8 +94,8 @@ class LocalUpdate(object):
                 # sample_size = len(self.trainloader)*args.local_bs,
                 sample_rate = VIRTUAL_STEP / len(self.trainloader),   
                 alphas = DEFAULT_ALPHAS,
-                noise_multiplier=NOISE_MULTIPLIER,
-                max_grad_norm=MAX_GRAD_NORM,
+                noise_multiplier=args.noise_multiplier,
+                max_grad_norm=args.max_grad_norm,
             )
             privacy_engine.attach(optimizer)   
 
@@ -112,17 +112,16 @@ class LocalUpdate(object):
             for batch_idx, (images, labels) in enumerate(self.trainloader):
                 images, labels = images.to(self.device), labels.to(self.device)
                 # print(f'image tensor size is {images.size()}')
-
-                model.zero_grad()
+                
                 log_probs = model(images)
-                loss = criterion(log_probs, labels)
-                optimizer.zero_grad() # try this for unequal noniid, as train.py has this line
+                loss = criterion(log_probs, labels)                
                 loss.backward()
                 # virtual step to save memory for noise addition
                 if (iter+1) % VIRTUAL_STEP == 0 or (iter+1) == len(self.trainloader):
-                    optimizer.step()
+                    optimizer.step() # update params
+                    optimizer.zero_grad()
                 else:
-                    optimizer.virtual_step()
+                    optimizer.virtual_step() # sum per-sample gradients into one and save for later, discard gradients
 
                 batch_loss.append(loss.item())
             epoch_loss.append(sum(batch_loss)/len(batch_loss))

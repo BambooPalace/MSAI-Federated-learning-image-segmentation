@@ -57,7 +57,11 @@ if __name__ == '__main__':
     if args.dp:
         global_model = convert_batchnorm_modules(global_model)
         inspector = DPModelInspector()
-        assert inspector.validate(global_model) == True            
+        assert inspector.validate(global_model) == True
+
+        if args.no_dropout:
+            global_model.classifier[3].p = 0
+            global_model.aux_classifier[3].p = 0            
 
     # Set the model to train and send it to device.
     global_model.to(device)
@@ -104,12 +108,13 @@ if __name__ == '__main__':
         global_model.load_state_dict(global_weights)
         # save global model to checkpoint
         exp_name = 'fed_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}]_lr[{}x{}]_{}_{}'.\
-                    format(args.data, args.model, args.num_classes, epoch+1, args.frac, args.iid, \
+                    format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, \
                         args.unequal, args.local_ep, args.local_bs, args.lr, args.aux_lr_param, args.lr_scheduler, args.optimizer)
         if args.dp:
-            exp_name = 'fedDP_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}v{}]_lr{}'.\
-                    format(args.data, args.model, args.num_classes, epoch+1, args.frac, args.iid, \
-                        args.unequal, args.local_ep, args.local_bs, args.virtual_bs, args.lr)                   
+            exp_name = 'fedDP_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}v{}]_lr{}_noise{}_norm{}_drop{}'.\
+                    format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, \
+                        args.unequal, args.local_ep, args.local_bs, args.virtual_bs, args.lr, args.noise_multiplier,
+                        args.max_grad_norm, bool(args.no_dropout))                   
         if epoch % args.save_frequency == 0 or epoch == args.epochs-1:
             torch.save(
                 {

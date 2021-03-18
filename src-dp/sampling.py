@@ -51,7 +51,7 @@ def coco_noniid(dataset, num_users, data):
     """
     timer = time.time()
     # 4,000 training imgs -->  200 shards
-    num_shards = 200 if data == 'val2017' else 2000 # default 200
+    num_shards = 200 if data == 'val2017' else 4000 # default 200
     num_imgs = len(dataset) // num_shards 
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}    
@@ -90,7 +90,7 @@ def coco_noniid_unequal(dataset, num_users, data):
     """
     timer = time.time()
     # 4000 training imgs --> 1000 shards
-    num_shards = 1000 if data == 'val2017' else 10000 # default 1000
+    num_shards = 1000 if data == 'val2017' else 20000 # default 1000
     num_imgs = len(dataset) // num_shards
     idx_shard = [i for i in range(num_shards)]
     dict_users = {i: np.array([]) for i in range(num_users)}
@@ -108,7 +108,7 @@ def coco_noniid_unequal(dataset, num_users, data):
     idxs = idxs_labels[0, :]
 
     # Minimum and maximum shards assigned per client:
-    min_shard = 1 
+    min_shard = 5  # original is 1, 0.8*min_shard*imgs/shards should be at least bs, for DP to work
     max_shard = 30 # original is 30
 
     # Divide the shards into random chunks for every client

@@ -56,5 +56,6 @@ def args_parser():
     parser.add_argument('--data', type=str, default='val2017', choices=['val2017', 'train2017'], help='val has 5k images while train has 118k')
     parser.add_argument('--local_test_frac', default=1.0, type=float, help='frac of num_users for local testing')
     parser.add_argument('--dp', action='store_true')
+    parser.add_argument('--virtual_bs', default=4, type=int, help='the bs for noise addition, to save memory')
     args = parser.parse_args()
     return args

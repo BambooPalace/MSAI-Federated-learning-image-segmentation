@@ -107,9 +107,9 @@ if __name__ == '__main__':
                     format(args.data, args.model, args.num_classes, epoch+1, args.frac, args.iid, \
                         args.unequal, args.local_ep, args.local_bs, args.lr, args.aux_lr_param, args.lr_scheduler, args.optimizer)
         if args.dp:
-            exp_name = 'fedDP_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}]_lr{}'.\
+            exp_name = 'fedDP_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}v{}]_lr{}'.\
                     format(args.data, args.model, args.num_classes, epoch+1, args.frac, args.iid, \
-                        args.unequal, args.local_ep, args.local_bs, args.lr)                   
+                        args.unequal, args.local_ep, args.local_bs, args.virtual_bs, args.lr)                   
         if epoch % args.save_frequency == 0 or epoch == args.epochs-1:
             torch.save(
                 {

@@ -52,7 +52,7 @@ class LocalUpdate(object):
 
         # mod1: add num_workers, to see if can speed up training. ANS is no for cifar
         trainloader = DataLoader(DatasetSplit(dataset, idxs_train),
-                                 batch_size=self.args.local_bs, num_workers=self.args.num_workers, shuffle=True)
+                                 batch_size=self.args.virtual_bs, num_workers=self.args.num_workers, shuffle=True)
         testloader = DataLoader(DatasetSplit(dataset, idxs_test),
                                 batch_size=max(len(idxs_test)//10,1), num_workers=self.args.num_workers, shuffle=False)
         return trainloader, testloader
@@ -86,12 +86,13 @@ class LocalUpdate(object):
             optimizer = torch.optim.Adam(params_to_optimize, lr=args.lr,
                                         weight_decay=1e-4)
         #PRIVACY ENGINE
+        VIRTUAL_STEP = args.local_bs // args.virtual_bs
         if args.dp:
             privacy_engine = PrivacyEngine(
                 model,
                 # batch_size = args.local_bs,
                 # sample_size = len(self.trainloader)*args.local_bs,
-                sample_rate = 1 / len(self.trainloader),   
+                sample_rate = VIRTUAL_STEP / len(self.trainloader),   
                 alphas = DEFAULT_ALPHAS,
                 noise_multiplier=NOISE_MULTIPLIER,
                 max_grad_norm=MAX_GRAD_NORM,
@@ -117,7 +118,11 @@ class LocalUpdate(object):
                 loss = criterion(log_probs, labels)
                 optimizer.zero_grad() # try this for unequal noniid, as train.py has this line
                 loss.backward()
-                optimizer.step()
+                # virtual step to save memory for noise addition
+                if (iter+1) % VIRTUAL_STEP == 0 or (iter+1) == len(self.trainloader):
+                    optimizer.step()
+                else:
+                    optimizer.virtual_step()
 
                 batch_loss.append(loss.item())
             epoch_loss.append(sum(batch_loss)/len(batch_loss))

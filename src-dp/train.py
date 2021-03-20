@@ -32,11 +32,15 @@ def get_transform(train):
 
     min_size = int((0.5 if train else 1.0) * base_size)
     max_size = int((2.0 if train else 1.0) * base_size)
-    transforms = []
-    transforms.append(T.RandomResize(min_size, max_size))
-    if train:
+    transforms = []    
+    
+    if train:            
+        transforms.append(T.RandomResize(min_size, max_size))#move this line inside if condition    
         transforms.append(T.RandomHorizontalFlip(0.5))
+        # can add random rotation if have chance
         transforms.append(T.RandomCrop(crop_size))
+    else:
+        transforms.append(T.Resize((min_size, max_size)))# add new line to reshape test/dp-train data into square shape
     transforms.append(T.ToTensor())
     transforms.append(T.Normalize(mean=[0.485, 0.456, 0.406],
                                   std=[0.229, 0.224, 0.225]))

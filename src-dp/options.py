@@ -28,14 +28,14 @@ def args_parser():
 
     # model arguments
     parser.add_argument('--model', type=str, default='fcn_mobilenetv2', \
-                        choices=['fcn_mobilenetv2', 'deeplabv3_mobilenetv2', 'deeplabv3_mobilenetv3', 'lraspp_mobilenetv3'], 
+                        choices=['fcn_mobilenetv2', 'deeplabv3_mobilenetv2', 'deeplabv3_mobilenetv3', 'lraspp_mobilenetv3', 'fcn_resnet50'], 
                         help='model name')    
     parser.add_argument('--num_classes', type=int, default=81, help="number \
                         of classes")
     parser.add_argument('--cpu_only', action='store_true', help="indicate to use cpu only")
     parser.add_argument('--optimizer', type=str, default='sgd', help="type \
                         of optimizer")
-    parser.add_argument('-aux', '--aux_lr_param', type=int, default=2, 
+    parser.add_argument('-aux', '--aux_lr', type=int, default=2, 
                         help='times of normal learning rate used for auxiliary classifier ')
     parser.add_argument('--lr_scheduler', default='lambda', choices=['lambda', 'step'], help='learning rate scheduler')
     parser.add_argument('--checkpoint', type=str, default=None, help='full file name of the checkpoint')

@@ -35,9 +35,10 @@ def get_dataset(args):
             catIds = random_n_classes(args.num_classes)
         elif args.num_classes == 21:
             catIds = [0, 5, 2, 16, 9, 44, 6, 3, 17, 62, 21, 67, 18, 19, 4, 1, 64, 20, 63, 7, 72]
+        augmentation = False if args.dp else True
         train_dataset = datasets.CocoDetection(path2data, path2ann, transforms=Compose([FilterAndRemapCocoCategories(catIds, remap=True), 
                                                                                     ConvertCocoPolysToMask(),
-                                                                                    get_transform(train=True)]))
+                                                                                    get_transform(train=augmentation)]))
         test_dataset = datasets.CocoDetection(path2data, path2ann, transforms=Compose([FilterAndRemapCocoCategories(catIds, remap=True), 
                                                                             ConvertCocoPolysToMask(),
                                                                             get_transform(train=False)]))

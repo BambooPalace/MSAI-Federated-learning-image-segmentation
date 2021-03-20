@@ -14,7 +14,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 import torch
-from torchvision.models.segmentation import lraspp_mobilenet_v3_large, deeplabv3_mobilenet_v3_large
+from torchvision.models.segmentation import lraspp_mobilenet_v3_large, deeplabv3_mobilenet_v3_large, fcn_resnet50
 from torch.utils.data import DataLoader
 from opacus.dp_model_inspector import DPModelInspector
 
@@ -28,6 +28,50 @@ from fcn import FCNHead
 MAX_GRAD_NORM = 1.2
 NOISE_MULTIPLIER = 0.38
 DELTA = 1e-5
+
+def make_model(args):
+    if args.model == 'fcn_mobilenetv2':
+        # Convolutional neural netorks
+        global_model = fcn_mobilenetv2(num_classes=args.num_classes, aux_loss=bool(args.aux_lr))
+        if args.no_dropout:
+            global_model.classifier[3].p = 0
+            global_model.aux_classifier[3].p = 0 
+
+    elif args.model == 'deeplabv3_mobilenetv2':
+        global_model = deeplabv3_mobilenetv2(num_classes=args.num_classes, aux_loss=bool(args.aux_lr))
+        if args.no_dropout:
+            global_model.classifier[3].p = 0
+            global_model.aux_classifier[3].p = 0 
+
+    elif args.model == 'deeplabv3_mobilenetv3':
+        global_model = deeplabv3_mobilenet_v3_large(num_classes=args.num_classes, aux_loss=bool(args.aux_lr), 
+                                                    pretrained=args.pretrained)
+        # fix batchnorm channels divisible by 8
+        in_channels = global_model.aux_classifier[0].in_channels
+        global_model.aux_classifier = FCNHead(in_channels, args.num_classes)
+        if args.no_dropout:
+            global_model.classifier[0].project[3].p=0
+
+    elif args.model == 'lraspp_mobilenetv3':        
+        global_model = lraspp_mobilenet_v3_large(num_classes=args.num_classes, pretrained=args.pretrained)
+        # no aux classifier, no dropout layer
+        global_model.aux_classifier = None   
+
+    #resnet for test only as too many params 
+    elif args.model == 'fcn_resnet50':
+        global_model = fcn_resnet50(num_classes=args.num_classes, pretrained=True)
+        
+    else:
+        exit('Error: unrecognized model')
+
+    # change model architecutre from batch_norm to group_norm for DP
+    if args.dp:
+        global_model = convert_batchnorm_modules(global_model)
+        inspector = DPModelInspector()
+        assert inspector.validate(global_model) == True
+
+    return global_model
+
 
 if __name__ == '__main__':
     args = args_parser()
@@ -48,30 +92,7 @@ if __name__ == '__main__':
     test_loader = DataLoader(train_dataset, batch_size=1, num_workers=args.num_workers, shuffle=False)
 
     # BUILD MODEL
-    if args.model == 'fcn_mobilenetv2':
-        # Convolutional neural netorks
-        global_model = fcn_mobilenetv2(num_classes=args.num_classes, aux_loss=True)
-    elif args.model == 'deeplabv3_mobilenetv2':
-        global_model = deeplabv3_mobilenetv2(num_classes=args.num_classes, aux_loss=True)
-    elif args.model == 'deeplabv3_mobilenetv3':
-        global_model = deeplabv3_mobilenet_v3_large(num_classes=args.num_classes, aux_loss=True, pretrained=args.pretrained)
-        # fix batchnorm channels divisible by 8
-        in_channels = global_model.aux_classifier[0].in_channels
-        global_model.aux_classifier = FCNHead(in_channels, args.num_classes)
-    elif args.model == 'lraspp_mobilenetv3':
-        # no aux classifier
-        global_model = lraspp_mobilenet_v3_large(num_classes=args.num_classes, pretrained=args.pretrained)        
-    else:
-        exit('Error: unrecognized model')
-    # change model architecutre from batch_norm to group_norm for DP
-    if args.dp:
-        global_model = convert_batchnorm_modules(global_model)
-        inspector = DPModelInspector()
-        assert inspector.validate(global_model) == True
-
-        if args.no_dropout:
-            global_model.classifier[3].p = 0
-            global_model.aux_classifier[3].p = 0            
+    global_model = make_model(args)                   
 
     # Set the model to train and send it to device.
     global_model.to(device)
@@ -88,11 +109,23 @@ if __name__ == '__main__':
             map_location=device)
         global_model.load_state_dict(checkpoint['model'])
         start_ep = checkpoint['epoch'] + 1 
+    
+    # set exp name for logging
+    exp_name = 'fed_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}]_lr[{}x{}]_{}_{}'.\
+                format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, \
+                    args.unequal, args.local_ep, args.local_bs, args.lr, args.aux_lr, args.lr_scheduler, args.optimizer)
+    if args.dp:
+        exp_name = 'fedDP_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}v{}]_lr{}_noise{}_norm{}_drop{}'.\
+                format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, \
+                    args.unequal, args.local_ep, args.local_bs, args.virtual_bs, args.lr, args.noise_multiplier,
+                    args.max_grad_norm, int(args.no_dropout))      
 
-    # Global rounds / Training
+
+    ## Global rounds / Training
     print_log('\nTraining global model on {} of {} users locally for {} epochs'.format(args.frac, args.num_users, args.epochs))
     train_loss, local_test_accuracy, local_test_iou = [], [], []
     print_every = 1
+    # weights = []# comment off for checking weights update
     for epoch in tqdm(range(start_ep, args.epochs)):
         local_weights, local_losses = [], []
         print_log('\n | Global Training Round : {} |\n'.format(epoch+1))
@@ -112,21 +145,13 @@ if __name__ == '__main__':
             local_weights.append(copy.deepcopy(w))
             local_losses.append(copy.deepcopy(loss))
 
-        # update global weights
-        # torch.save(local_weights, 'local_weight.pt')        
+        ## UPDATE global weights              
         print_log('\nWeight averaging')
         global_weights = average_weights(local_weights)
-        # update global weights
-        global_model.load_state_dict(global_weights)
-        # save global model to checkpoint
-        exp_name = 'fed_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}]_lr[{}x{}]_{}_{}'.\
-                    format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, \
-                        args.unequal, args.local_ep, args.local_bs, args.lr, args.aux_lr_param, args.lr_scheduler, args.optimizer)
-        if args.dp:
-            exp_name = 'fedDP_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}v{}]_lr{}_noise{}_norm{}_drop{}'.\
-                    format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, \
-                        args.unequal, args.local_ep, args.local_bs, args.virtual_bs, args.lr, args.noise_multiplier,
-                        args.max_grad_norm, int(args.no_dropout))                   
+        global_model.load_state_dict(global_weights)    
+        # weights.append(global_weights)# comment off for checking weights update        
+
+        # save global model to checkpoint                 
         if epoch % args.save_frequency == 0 or epoch == args.epochs-1:
             torch.save(
                 {
@@ -141,7 +166,7 @@ if __name__ == '__main__':
         loss_avg = sum(local_losses) / len(local_losses)
         train_loss.append(loss_avg)
 
-        # Calculate avg test accuracy over all users at every epoch
+        # Calculate avg test accuracy over LOCAL data of a fraction of users at every epoch
         last_time = time.time()
         test_users = int(args.local_test_frac * args.num_users)
         print_log('Testing global model on {} users'.format(test_users))
@@ -164,9 +189,10 @@ if __name__ == '__main__':
             print_log('Local Test Accuracy: {:.2f}% '.format(local_test_accuracy[-1]))
             print_log('Local Test IoU: {:.2f}%'.format(local_test_iou[-1]))
             print_log('Run Time: {0:0.4f}\n'.format((time.time()-last_time)//60))
+    
+    # torch.save(weights, 'weights.pt')# comment off for checking weights update
 
-
-    # Inference on test dataset after completion of training
+    # Inference on GLOBAL test dataset after completion of training
     if not args.train_only:
         print_log('\nTesting global model on global test dataset')
         test_acc, test_iou, confmat = test_inference(args, global_model, test_loader)

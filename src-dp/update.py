@@ -69,13 +69,13 @@ class LocalUpdate(object):
 
         # Set optimizer and lr_scheduler for the local updates
         args = self.args
-        if args.aux_lr_param > 1:
+        if args.aux_lr > 1:
             params_to_optimize = [
             {"params": [p for p in model.backbone.parameters() if p.requires_grad]},
             {"params": [p for p in model.classifier.parameters() if p.requires_grad]}]
             if model.aux_classifier:
                 params = [p for p in model.aux_classifier.parameters() if p.requires_grad]
-                params_to_optimize.append({"params": params, "lr": args.lr * args.aux_lr_param}) #multiplier default is 10
+                params_to_optimize.append({"params": params, "lr": args.lr * args.aux_lr}) #multiplier default is 10
         else:
             params_to_optimize = [p for p in model.parameters() if p.requires_grad]
 

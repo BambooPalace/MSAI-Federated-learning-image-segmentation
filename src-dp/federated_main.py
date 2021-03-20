@@ -14,14 +14,16 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 import torch
+from torchvision.models.segmentation import lraspp_mobilenet_v3_large, deeplabv3_mobilenet_v3_large
 from torch.utils.data import DataLoader
 from opacus.dp_model_inspector import DPModelInspector
 
 from options import args_parser
 from update import LocalUpdate, test_inference
 from utils import get_dataset, average_weights, exp_details
-from models import fcn_mobilenetv2, deeplabv3_mobilenetv3, convert_batchnorm_modules
+from models import fcn_mobilenetv2, deeplabv3_mobilenetv2, convert_batchnorm_modules
 from train import train_one_epoch, evaluate, criterion
+from fcn import FCNHead
 
 MAX_GRAD_NORM = 1.2
 NOISE_MULTIPLIER = 0.38
@@ -50,7 +52,15 @@ if __name__ == '__main__':
         # Convolutional neural netorks
         global_model = fcn_mobilenetv2(num_classes=args.num_classes, aux_loss=True)
     elif args.model == 'deeplabv3_mobilenetv2':
-        global_model = deeplabv3_mobilenetv3(num_classes=args.num_classes, aux_loss=True)
+        global_model = deeplabv3_mobilenetv2(num_classes=args.num_classes, aux_loss=True)
+    elif args.model == 'deeplabv3_mobilenetv3':
+        global_model = deeplabv3_mobilenet_v3_large(num_classes=args.num_classes, aux_loss=True, pretrained=args.pretrained)
+        # fix batchnorm channels divisible by 8
+        in_channels = global_model.aux_classifier[0].in_channels
+        global_model.aux_classifier = FCNHead(in_channels, args.num_classes)
+    elif args.model == 'lraspp_mobilenetv3':
+        # no aux classifier
+        global_model = lraspp_mobilenet_v3_large(num_classes=args.num_classes, pretrained=args.pretrained)        
     else:
         exit('Error: unrecognized model')
     # change model architecutre from batch_norm to group_norm for DP
@@ -98,10 +108,12 @@ if __name__ == '__main__':
                                       idxs=user_groups[idx])
             w, loss = local_model.update_weights(model=copy.deepcopy(global_model),
                                                 global_round=epoch, log=log)
+
             local_weights.append(copy.deepcopy(w))
             local_losses.append(copy.deepcopy(loss))
 
         # update global weights
+        # torch.save(local_weights, 'local_weight.pt')        
         print_log('\nWeight averaging')
         global_weights = average_weights(local_weights)
         # update global weights
@@ -114,7 +126,7 @@ if __name__ == '__main__':
             exp_name = 'fedDP_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}v{}]_lr{}_noise{}_norm{}_drop{}'.\
                     format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, \
                         args.unequal, args.local_ep, args.local_bs, args.virtual_bs, args.lr, args.noise_multiplier,
-                        args.max_grad_norm, bool(args.no_dropout))                   
+                        args.max_grad_norm, int(args.no_dropout))                   
         if epoch % args.save_frequency == 0 or epoch == args.epochs-1:
             torch.save(
                 {

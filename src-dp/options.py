@@ -28,7 +28,8 @@ def args_parser():
 
     # model arguments
     parser.add_argument('--model', type=str, default='fcn_mobilenetv2', \
-                        choices=['fcn_mobilenetv2', 'deeplabv3_mobilenetv2'], help='model name')    
+                        choices=['fcn_mobilenetv2', 'deeplabv3_mobilenetv2', 'deeplabv3_mobilenetv3', 'lraspp_mobilenetv3'], 
+                        help='model name')    
     parser.add_argument('--num_classes', type=int, default=81, help="number \
                         of classes")
     parser.add_argument('--cpu_only', action='store_true', help="indicate to use cpu only")
@@ -40,6 +41,8 @@ def args_parser():
     parser.add_argument('--checkpoint', type=str, default=None, help='full file name of the checkpoint')
     parser.add_argument('--save_frequency', type=int, default=1, help='number of epochs to save checkpoint')
     parser.add_argument('--train_only', action='store_true')
+    parser.add_argument('--pretrained', action = 'store_true', 
+                        help='only available for deeplab_mobilenetv3 and lraspp_mobilenetv3')
 
     # datasets and training
     parser.add_argument('--dataset', type=str, default='coco', help="name of dataset")    
@@ -48,8 +51,6 @@ def args_parser():
     parser.add_argument('--unequal', type=int, default=0,
                         help='whether to use unequal data splits for  \
                         non-i.i.d setting (use 0 for equal splits)')
-    parser.add_argument('--stopping_rounds', type=int, default=10,
-                        help='rounds of early stopping')
     parser.add_argument('--verbose', type=int, default=0, help='verbose')
     parser.add_argument('--seed', type=int, default=1, help='random seed')
     parser.add_argument('--root', type=str, default='./', help='home directory')

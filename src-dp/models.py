@@ -1,9 +1,12 @@
 from typing import Callable, Type
+from math import gcd
+
+import torch.nn as nn
 from torchvision.models._utils import IntermediateLayerGetter
 from torchvision.models import mobilenet
 from torchvision.models.segmentation.deeplabv3 import DeepLabHead, DeepLabV3
-from torchvision.models.segmentation.fcn import FCN, FCNHead
-import torch.nn as nn
+
+from fcn import FCN, FCNHead
 
 
 __all__ = ['fcn_mobilenetv2', 'fcn_mobilenetv3', 'deeplabv3_mobilenetv3', 'deeplabv3_mobilenetv2']
@@ -36,7 +39,6 @@ def _segm_mobilenet(name, backbone_name, num_classes, aux, pretrained_backbone):
     return model
 
 
-
 def fcn_mobilenetv2(pretrained_backbone=True, 
                  num_classes=81, aux_loss=True, **kwargs):
     """Constructs a Fully-Convolutional Network model with a ResNet-50 backbone.
@@ -47,6 +49,7 @@ def fcn_mobilenetv2(pretrained_backbone=True,
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return _segm_mobilenet('fcn', 'mobilenet_v2', num_classes, aux_loss, pretrained_backbone, **kwargs)
+
 
 def fcn_mobilenetv3(large=False, pretrained_backbone=True,
                  num_classes=81, aux_loss=True, **kwargs):
@@ -60,6 +63,7 @@ def fcn_mobilenetv3(large=False, pretrained_backbone=True,
     backbone = 'mobilenet_v3_large' if large else 'mobilenet_v3_small'
     return _segm_mobilenet('fcn', backbone, num_classes, aux_loss, pretrained_backbone, **kwargs)
 
+
 def deeplabv3_mobilenetv2(pretrained_backbone=True, 
                        num_classes=81, aux_loss=True, **kwargs):
     """Constructs a DeepLabV3 model with a ResNet-50 backbone.
@@ -72,7 +76,7 @@ def deeplabv3_mobilenetv2(pretrained_backbone=True,
     return _segm_mobilenet('deeplabv3', 'mobilenet_v2', num_classes, aux_loss, pretrained_backbone, **kwargs)
 
 
-def deeplabv3_mobilenetv3(pretrained_backbone=True, 
+def deeplabv3_mobilenetv3(large=False, pretrained_backbone=True, 
                        num_classes=81, aux_loss=True, **kwargs):
     """Constructs a DeepLabV3 model with a ResNet-50 backbone.
 
@@ -162,13 +166,12 @@ def _batchnorm_to_instancenorm(module: nn.modules.batchnorm._BatchNorm) -> nn.Mo
 
     Returns:
         InstanceNorm module that can replace the BatchNorm module provided
-    """
-
+    """    
     def matchDim():
         if isinstance(module, nn.BatchNorm1d):
             return nn.InstanceNorm1d
         elif isinstance(module, nn.BatchNorm2d):
-            print(module.num_features)
+            print(module.num_features)            
             return nn.InstanceNorm2d
         elif isinstance(module, nn.BatchNorm3d):
             return nn.InstanceNorm3d
@@ -192,7 +195,6 @@ def _batchnorm_to_groupnorm(module: nn.modules.batchnorm._BatchNorm) -> nn.Modul
         paper *Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour*
         https://arxiv.org/pdf/1706.02677.pdf
     """
-    # print(module.num_features) #NOT PRINTING
     # use 8 instead of 32, as 8 is the maximum divisor of channel numbers
     return nn.GroupNorm(min(8, module.num_features), module.num_features, affine=True)
 
@@ -249,4 +251,13 @@ def convert_batchnorm_modules(
         >>>  print(model.layer1[0].bn1)
         GroupNorm module details
     """
+    return replace_all_modules(model, nn.modules.batchnorm._BatchNorm, converter)
+
+def check_bn_num_features(
+    model: nn.Module,
+    converter: Callable[
+        [nn.modules.batchnorm._BatchNorm], nn.Module
+    ] = _batchnorm_to_instancenorm,
+) -> nn.Module:
+    
     return replace_all_modules(model, nn.modules.batchnorm._BatchNorm, converter)

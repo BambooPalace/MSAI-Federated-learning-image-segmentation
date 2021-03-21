@@ -11,6 +11,7 @@ import time
 from tqdm import tqdm
 import torch
 from torch.utils.data import DataLoader
+from torchvision.models.segmentation import lraspp_mobilenet_v3_large, deeplabv3_mobilenet_v3_large, fcn_resnet50
 
 from utils import get_dataset
 from options import args_parser
@@ -18,6 +19,46 @@ from update import test_inference
 from models import fcn_mobilenetv2, deeplabv3_mobilenetv3
 from train import train_one_epoch, evaluate, criterion
 
+def make_model(args):
+    if args.model == 'fcn_mobilenetv2':
+        # Convolutional neural netorks
+        global_model = fcn_mobilenetv2(num_classes=args.num_classes, aux_loss=bool(args.aux_lr))
+
+    elif args.model == 'deeplabv3_mobilenetv2':
+        global_model = deeplabv3_mobilenetv2(num_classes=args.num_classes, aux_loss=bool(args.aux_lr))
+
+    elif args.model == 'deeplabv3_mobilenetv3':
+        global_model = deeplabv3_mobilenet_v3_large(num_classes=args.num_classes, aux_loss=bool(args.aux_lr), 
+                                                    pretrained=args.pretrained)
+
+
+    elif args.model == 'lraspp_mobilenetv3':        
+        global_model = lraspp_mobilenet_v3_large(num_classes=args.num_classes, pretrained=args.pretrained)
+        # no aux classifier, no dropout layer
+        global_model.aux_classifier = None   
+
+    #resnet for test only as too many params 
+    elif args.model == 'fcn_resnet50':
+        global_model = fcn_resnet50(num_classes=args.num_classes, pretrained=True)
+        
+    else:
+        exit('Error: unrecognized model')
+
+    if args.activation == 'tanh': # test tanh for DP-SGD
+        global_model = convert_relu_tanh(global_model)
+    if args.freeze_backbone: # test for DP-SGD
+        for p in global_model.backbone.parameters():
+            p.requires_grad = False
+
+    return global_model
+
+def get_exp_name(args):
+    exp_name = 'baseline_{}_{}_c{}_e{}_B[{}]_lr[{}x{}]_{}_{}_weight{}'.\
+                format(args.data, args.model, args.num_classes, args.epochs, 
+                # args.frac, args.iid, args.unequal,args.local_ep, 
+                args.local_bs, args.lr, args.aux_lr, args.lr_scheduler, args.optimizer, args.weight)    
+                    
+    return exp_name
 
 if __name__ == '__main__':
     args = args_parser()
@@ -30,26 +71,21 @@ if __name__ == '__main__':
     test_loader = DataLoader(train_dataset, batch_size=1, num_workers=args.num_workers, shuffle=False)
 
     # BUILD MODEL
-    if args.model == 'fcn_mobilenetv2':
-        # Convolutional neural netorks
-        global_model = fcn_mobilenetv2(num_classes=args.num_classes, aux_loss=True)
-    elif args.model == 'deeplabv3_mobilenetv2':
-        global_model = deeplabv3_mobilenetv3(num_classes=args.num_classes, aux_loss=True)
-    else:
-        exit('Error: unrecognized model')
+    global_model = make_model(args)
+    exp_name = get_exp_name(args)
 
     # Set the model to train and send it to device.
     global_model.to(device)
     global_model.train()
     # print(global_model)
 
-    if args.aux_lr_param > 1:
+    if args.aux_lr > 1:
         params_to_optimize = [
         {"params": [p for p in global_model.backbone.parameters() if p.requires_grad]},
         {"params": [p for p in global_model.classifier.parameters() if p.requires_grad]}]
         if global_model.aux_classifier:
             params = [p for p in global_model.aux_classifier.parameters() if p.requires_grad]
-            params_to_optimize.append({"params": params, "lr": args.lr * args.aux_lr_param}) #multiplier default is 10
+            params_to_optimize.append({"params": params, "lr": args.lr * args.aux_lr}) #multiplier default is 10
     else:
         params_to_optimize = [p for p in global_model.parameters() if p.requires_grad]
 
@@ -81,7 +117,8 @@ if __name__ == '__main__':
     print(args.epochs,' epochs of training starts:')
     lines = ['Options:', str(args)]
     for epoch in tqdm(range(start_ep, args.epochs)):
-        logger = train_one_epoch(global_model, criterion, optimizer, train_loader, lr_scheduler, device, epoch, print_freq=1000)
+        logger = train_one_epoch(global_model, criterion, optimizer, train_loader, lr_scheduler, 
+                                device, epoch, print_freq=1000, background_weight=args.weight)
         lines.append(logger)
         lr_scheduler.step()
         if epoch % args.save_frequency == 0 or epoch == args.epochs-1:
@@ -93,7 +130,8 @@ if __name__ == '__main__':
                     'epoch': epoch+1,
                     'model_name': args.model
                 },
-                os.path.join(args.root, 'save/checkpoints', '{}_auxlr{}_lr{}_{}_ep{}.pth'.format(args.model, args.aux_lr_param, args.lr, args.lr_scheduler, epoch+1)))
+                os.path.join(args.root, 'save/checkpoints', exp_name +'.pth')
+                )
     print('Training ends')
     
     print('Testing:')
@@ -108,8 +146,7 @@ if __name__ == '__main__':
 
     # logging
     
-    filename = '{}_auxlr{}_lr{}_{}_ep{}.txt'.format(args.model, args.aux_lr_param, args.lr, args.lr_scheduler, args.epochs)
-    path = os.path.join(args.root, 'save', filename)
+    path = os.path.join(args.root, 'save/logs', exp_name + '_log.txt')
     with open(path, 'w') as w:
         for line in lines:
             w.write(line + '\n')

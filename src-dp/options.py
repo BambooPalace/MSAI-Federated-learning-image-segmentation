@@ -39,6 +39,7 @@ def args_parser():
     parser.add_argument('--lr_scheduler', default='lambda', choices=['lambda', 'step'], help='learning rate scheduler')
     parser.add_argument('--checkpoint', type=str, default=None, help='full file name of the checkpoint')
     parser.add_argument('--save_frequency', type=int, default=1, help='number of epochs to save checkpoint')
+    parser.add_argument('--test_frequency', type=int, default=5, help='number of epochs to eval global test data')
     parser.add_argument('--train_only', action='store_true')
     parser.add_argument('--pretrained', action = 'store_true', 
                         help='only available for deeplab_mobilenetv3 and lraspp_mobilenetv3')        

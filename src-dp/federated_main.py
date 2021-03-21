@@ -80,14 +80,15 @@ def make_model(args):
 
 
 def get_exp_name(args):
-    exp_name = 'fed_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}]_lr[{}x{}]_{}_{}_weight{}'.\
-                format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, args.unequal,
-                 args.local_ep, args.local_bs, args.lr, args.aux_lr, args.lr_scheduler, args.optimizer, args.weight)
+    exp_name = 'fed_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}]_lr[{}x{}]_{}_{}_weight{}_{}'.\
+            format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, args.unequal,
+                args.local_ep, args.local_bs, args.lr, args.aux_lr, args.lr_scheduler, args.optimizer, args.weight,
+                args.activation,)
     if args.dp:
         exp_name = 'fedDP_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}v{}]_lr{}_noise{}_norm{}_weight{}_{}_freeze{}'.\
                 format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, \
                     args.unequal, args.local_ep, args.local_bs, args.virtual_bs, args.lr, args.noise_multiplier,
-                    args.max_grad_norm, args.weight, args.activation, bool(args.freeze_backbone),
+                    args.max_grad_norm, args.weight, args.activation, int(args.freeze_backbone),
                     #int(args.no_dropout), args.lr_scheduler, args.optimizer
                     ) 
     return exp_name
@@ -195,7 +196,7 @@ if __name__ == '__main__':
         local_test_iou.append(sum(list_iou)/len(list_iou))
 
         # print global training loss after every 'i' rounds
-        if (epoch+1) % print_every == 0:
+        if (epoch+1) % args.test_frequency == 0:
             print_log('\nAvg Training Stats after {} global rounds:'.format(epoch+1))
             print_log('Training Loss : {}'.format(np.mean(np.array(train_loss))))
             print_log('Local Test Accuracy: {:.2f}% '.format(local_test_accuracy[-1]))
@@ -204,15 +205,15 @@ if __name__ == '__main__':
     
     # torch.save(weights, 'weights.pt')# comment off for checking weights update
 
-    # Inference on GLOBAL test dataset after completion of training
-    if not args.train_only:
-        print_log('\nTesting global model on global test dataset')
-        test_acc, test_iou, confmat = test_inference(args, global_model, test_loader)
-        print_log(confmat)
-        print_log('\nResults after {} global rounds of training:'.format(args.epochs))
-        print_log("|---- Global Test Accuracy: {:.2f}%".format(test_acc))
-        print_log("|---- Global Test IoU: {:.2f}%".format(test_iou))
-        print_log('\n Total Run Time: {0:0.4f}'.format((time.time()-start_time)//60))
+        # GLOBAL test dataset evaluation after completion of training
+        if not args.train_only and (epoch+1) % args.test_frequency == 0:
+            print_log('\nTesting global model on global test dataset')
+            test_acc, test_iou, confmat = test_inference(args, global_model, test_loader)
+            print_log(confmat)
+            print_log('\nResults after {} global rounds of training:'.format(args.epochs))
+            print_log("|---- Global Test Accuracy: {:.2f}%".format(test_acc))
+            print_log("|---- Global Test IoU: {:.2f}%".format(test_iou))
+            print_log('\n Total Run Time: {0:0.4f}'.format((time.time()-start_time)//60))
 
     # Plot Loss curve
     if args.epochs > 1:

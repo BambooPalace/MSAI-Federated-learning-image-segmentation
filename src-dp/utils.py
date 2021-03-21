@@ -12,6 +12,77 @@ from train import get_transform
 from coco_utils import ConvertCocoPolysToMask, FilterAndRemapCocoCategories, random_n_classes
 from sampling import *
 
+import numpy as np
+from PIL import Image
+
+
+class PennFudanDataset(object):
+    def __init__(self, root, transforms):
+        self.root = root
+        self.transforms = transforms
+        # load all image files, sorting them to
+        # ensure that they are aligned
+        self.imgs = list(sorted(os.listdir(os.path.join(root, "PNGImages"))))
+        self.masks = list(sorted(os.listdir(os.path.join(root, "PedMasks"))))
+
+    def __getitem__(self, idx):
+        # load images ad masks
+        img_path = os.path.join(self.root, "PNGImages", self.imgs[idx])
+        mask_path = os.path.join(self.root, "PedMasks", self.masks[idx])
+        img = Image.open(img_path).convert("RGB")
+        # note that we haven't converted the mask to RGB,
+        # because each color corresponds to a different instance
+        # with 0 being background
+        mask = Image.open(mask_path)
+        # convert the PIL Image into a numpy array
+        mask = np.array(mask)
+        # instances are encoded as different colors
+        obj_ids = np.unique(mask)
+        # first id is the background, so remove it
+        obj_ids = obj_ids[1:]
+
+        # split the color-encoded mask into a set
+        # of binary masks
+        masks = mask == obj_ids[:, None, None]
+
+        # get bounding box coordinates for each mask
+        num_objs = len(obj_ids)
+        boxes = []
+        for i in range(num_objs):
+            pos = np.where(masks[i])
+            xmin = np.min(pos[1])
+            xmax = np.max(pos[1])
+            ymin = np.min(pos[0])
+            ymax = np.max(pos[0])
+            boxes.append([xmin, ymin, xmax, ymax])
+
+        # convert everything into a torch.Tensor
+        boxes = torch.as_tensor(boxes, dtype=torch.float32)
+        # there is only one class
+        labels = torch.ones((num_objs,), dtype=torch.int64)
+        masks = torch.as_tensor(masks, dtype=torch.uint8)
+
+        image_id = torch.tensor([idx])
+        area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
+        # suppose all instances are not crowd
+        iscrowd = torch.zeros((num_objs,), dtype=torch.int64)
+
+        target = {}
+        target["boxes"] = boxes
+        target["labels"] = labels
+        target["masks"] = masks
+        target["image_id"] = image_id
+        target["area"] = area
+        target["iscrowd"] = iscrowd
+
+        if self.transforms is not None:
+            img, target = self.transforms(img, target)
+
+        return img, target
+
+    def __len__(self):
+        return len(self.imgs)
+
 
 
 def get_dataset(args):
@@ -19,8 +90,25 @@ def get_dataset(args):
     the keys are the user index and the values are the corresponding data for
     each of those users.
     """
+    if args.dataset == 'pedestrain':
+        # 170 images with 2 classes
+        path2data = os.path.join(args.root, 'data/PennFudanPed')
+        train_dataset = PennFudanDataset(path2data, get_transform(train=True))
+        test_dataset = PennFudanDataset(path2data, get_transform(train=False))
+        torch.manual_seed(args.seed)
+        split_idx=len(train_dataset)//5 * 4
+        idxs = torch.randperm(len(train_dataset)).tolist()
+        # torch.save(idxs, 'idxs.pt')#check if same idxs for different runs: YES
+        train_dataset = torch.utils.data.Subset(train_dataset, idxs[:split_idx])
+        test_dataset = torch.utils.data.Subset(test_dataset, idxs[split_idx:])
+        
+        if args.iid:
+            # Sample IID user data from Mnist
+            user_groups = coco_iid(train_dataset, args.num_users)
+        else:
+            raise AttributeError('current iid options are not available for pedestrain dataset')        
 
-    if args.dataset == 'coco':
+    elif args.dataset == 'coco':
         if args.data == 'val2017':
             path2data = os.path.join(args.root, 'data/coco/val2017')
             path2ann = os.path.join(args.root, 'data/coco/annotations/instances_val2017.json')

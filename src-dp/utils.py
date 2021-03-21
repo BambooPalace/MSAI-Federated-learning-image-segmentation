@@ -42,10 +42,11 @@ def get_dataset(args):
         test_dataset = datasets.CocoDetection(path2data, path2ann, transforms=Compose([FilterAndRemapCocoCategories(catIds, remap=True), 
                                                                             ConvertCocoPolysToMask(),
                                                                             get_transform(train=False)]))
-        # split train and test indice
+         # split train and test indice
         torch.manual_seed(args.seed)
         split_idx=len(train_dataset)//5 * 4
         idxs = torch.randperm(len(train_dataset)).tolist()
+        # torch.save(idxs, 'idxs.pt')#check if same idxs for different runs: YES
         train_dataset = torch.utils.data.Subset(train_dataset, idxs[:split_idx])
         test_dataset = torch.utils.data.Subset(test_dataset, idxs[split_idx:])
 

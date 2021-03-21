@@ -21,7 +21,7 @@ from opacus.dp_model_inspector import DPModelInspector
 from options import args_parser
 from update import LocalUpdate, test_inference
 from utils import get_dataset, average_weights, exp_details
-from models import fcn_mobilenetv2, deeplabv3_mobilenetv2, convert_batchnorm_modules
+from models import fcn_mobilenetv2, deeplabv3_mobilenetv2, convert_batchnorm_modules, convert_relu_tanh
 from train import train_one_epoch, evaluate, criterion
 from fcn import FCNHead
 
@@ -64,6 +64,12 @@ def make_model(args):
     else:
         exit('Error: unrecognized model')
 
+    if args.activation == 'tanh': # test tanh for DP-SGD
+        global_model = convert_relu_tanh(global_model)
+    if args.freeze_backbone: # test for DP-SGD
+        for p in global_model.backbone.parameters():
+            p.requires_grad = False
+
     # change model architecutre from batch_norm to group_norm for DP
     if args.dp:
         global_model = convert_batchnorm_modules(global_model)
@@ -71,6 +77,20 @@ def make_model(args):
         assert inspector.validate(global_model) == True
 
     return global_model
+
+
+def get_exp_name(args):
+    exp_name = 'fed_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}]_lr[{}x{}]_{}_{}_weight{}'.\
+                format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, args.unequal,
+                 args.local_ep, args.local_bs, args.lr, args.aux_lr, args.lr_scheduler, args.optimizer, args.weight)
+    if args.dp:
+        exp_name = 'fedDP_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}v{}]_lr{}_noise{}_norm{}_weight{}_{}_freeze{}'.\
+                format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, \
+                    args.unequal, args.local_ep, args.local_bs, args.virtual_bs, args.lr, args.noise_multiplier,
+                    args.max_grad_norm, args.weight, args.activation, bool(args.freeze_backbone),
+                    #int(args.no_dropout), args.lr_scheduler, args.optimizer
+                    ) 
+    return exp_name
 
 
 if __name__ == '__main__':
@@ -111,15 +131,7 @@ if __name__ == '__main__':
         start_ep = checkpoint['epoch'] + 1 
     
     # set exp name for logging
-    exp_name = 'fed_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}]_lr[{}x{}]_{}_{}'.\
-                format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, \
-                    args.unequal, args.local_ep, args.local_bs, args.lr, args.aux_lr, args.lr_scheduler, args.optimizer)
-    if args.dp:
-        exp_name = 'fedDP_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}v{}]_lr{}_noise{}_norm{}_drop{}'.\
-                format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, \
-                    args.unequal, args.local_ep, args.local_bs, args.virtual_bs, args.lr, args.noise_multiplier,
-                    args.max_grad_norm, int(args.no_dropout))      
-
+    exp_name = get_exp_name(args)
 
     ## Global rounds / Training
     print_log('\nTraining global model on {} of {} users locally for {} epochs'.format(args.frac, args.num_users, args.epochs))

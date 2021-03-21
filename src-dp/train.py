@@ -48,8 +48,10 @@ def get_transform(train):
     return T.Compose(transforms)
 
 
-def criterion(inputs, target):
+def criterion(inputs, target, background_weight=1.0):
     losses = {}
+    weight = torch.ones(21)
+    weight[0] = background_weight
     for name, x in inputs.items():
         losses[name] = nn.functional.cross_entropy(x, target, ignore_index=255)
 

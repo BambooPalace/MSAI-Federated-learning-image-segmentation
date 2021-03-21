@@ -261,3 +261,18 @@ def check_bn_num_features(
 ) -> nn.Module:
     
     return replace_all_modules(model, nn.modules.batchnorm._BatchNorm, converter)
+
+def _relu_2_tanh(module: nn.modules.activation.ReLU) -> nn.Module:
+    if isinstance(module, nn.modules.activation.ReLU):
+        return nn.Tanh()        
+
+def convert_relu_tanh(
+    model: nn.Module,
+    converter: Callable[
+        [nn.modules.activation.ReLU], nn.Module
+    ] = _relu_2_tanh, #_batchnorm_to_instancenorm
+) -> nn.Module:
+    """
+    Converts all RELU modules to TANH for DP-SGD.
+    """
+    return replace_all_modules(model, nn.modules.activation.ReLU, converter)

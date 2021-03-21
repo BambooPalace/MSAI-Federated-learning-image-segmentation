@@ -30,11 +30,10 @@ def args_parser():
     parser.add_argument('--model', type=str, default='fcn_mobilenetv2', \
                         choices=['fcn_mobilenetv2', 'deeplabv3_mobilenetv2', 'deeplabv3_mobilenetv3', 'lraspp_mobilenetv3', 'fcn_resnet50'], 
                         help='model name')    
-    parser.add_argument('--num_classes', type=int, default=81, help="number \
-                        of classes")
+    parser.add_argument('--num_classes', type=int, default=81, help="number of classes")
     parser.add_argument('--cpu_only', action='store_true', help="indicate to use cpu only")
-    parser.add_argument('--optimizer', type=str, default='sgd', help="type \
-                        of optimizer")
+    parser.add_argument('--optimizer', type=str, default='sgd', choices=['sgd', 'adam'],
+                        help="type of optimizer")
     parser.add_argument('-aux', '--aux_lr', type=int, default=2, 
                         help='times of normal learning rate used for auxiliary classifier ')
     parser.add_argument('--lr_scheduler', default='lambda', choices=['lambda', 'step'], help='learning rate scheduler')
@@ -42,7 +41,9 @@ def args_parser():
     parser.add_argument('--save_frequency', type=int, default=1, help='number of epochs to save checkpoint')
     parser.add_argument('--train_only', action='store_true')
     parser.add_argument('--pretrained', action = 'store_true', 
-                        help='only available for deeplab_mobilenetv3 and lraspp_mobilenetv3')
+                        help='only available for deeplab_mobilenetv3 and lraspp_mobilenetv3')        
+    parser.add_argument('--activation', default='relu', choices=['relu', 'tanh'], 
+                        help='set activatition function in models as argument')                        
 
     # datasets and training
     parser.add_argument('--dataset', type=str, default='coco', help="name of dataset")    
@@ -56,6 +57,8 @@ def args_parser():
     parser.add_argument('--root', type=str, default='./', help='home directory')
     parser.add_argument('--data', type=str, default='val2017', choices=['val2017', 'train2017'], help='val has 5k images while train has 118k')
     parser.add_argument('--local_test_frac', default=0.1, type=float, help='frac of num_users for local testing')
+    parser.add_argument('--weight', default=1.0, type=float, help='the weight assigned to computing loss of background class')
+    parser.add_argument('--freeze_backbone', action='store_true', help='choose to not train backbone')
 
     # DP
     parser.add_argument('--dp', action='store_true')

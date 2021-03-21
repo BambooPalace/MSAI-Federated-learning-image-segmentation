@@ -110,17 +110,21 @@ class LocalUpdate(object):
         for iter in range(self.args.local_ep):
             batch_loss = []
             for batch_idx, (images, labels) in enumerate(self.trainloader):
-                images, labels = images.to(self.device), labels.to(self.device)                
-                
+                images, labels = images.to(self.device), labels.to(self.device)                                
                 log_probs = model(images)
-                loss = criterion(log_probs, labels)
+                loss = criterion(log_probs, labels, background_weight=self.args.weight)
                 loss.backward()
-                # virtual step to save memory for noise addition
-                if (iter+1) % VIRTUAL_STEP == 0 or (iter+1) == len(self.trainloader):
+
+                if not args.dp:
                     optimizer.step() # update params
-                    optimizer.zero_grad()                    
+                    optimizer.zero_grad()
+                # virtual step to save memory for noise addition
                 else:
-                    optimizer.virtual_step() # sum per-sample gradients into one and save for later, discard gradients
+                    if (iter+1) % VIRTUAL_STEP == 0 or (iter+1) == len(self.trainloader):
+                        optimizer.step() # update params
+                        optimizer.zero_grad()                    
+                    else:
+                        optimizer.virtual_step() # sum per-sample gradients into one and save for later, discard gradients
 
                 batch_loss.append(loss.item())
             epoch_loss.append(sum(batch_loss)/len(batch_loss))

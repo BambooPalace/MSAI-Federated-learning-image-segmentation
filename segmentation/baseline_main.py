@@ -118,7 +118,7 @@ if __name__ == '__main__':
     lines = ['Options:', str(args)]
     for epoch in tqdm(range(start_ep, args.epochs)):
         logger = train_one_epoch(global_model, criterion, optimizer, train_loader, lr_scheduler, 
-                                device, epoch, print_freq=1000, background_weight=args.weight)
+                                device, epoch, print_freq=1000, args=args)
         lines.append(logger)
         lr_scheduler.step()
         if epoch % args.save_frequency == 0 or epoch == args.epochs-1:

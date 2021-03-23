@@ -42,7 +42,7 @@ def coco_iid(dataset, num_users):
         all_idxs = list(set(all_idxs) - dict_users[i])
     return dict_users
 
-def coco_noniid(dataset, num_users, data, sample_rate):
+def coco_noniid(dataset, num_users, data):
     """
     Sample non-I.I.D client data from MNIST dataset
     :param dataset:
@@ -57,7 +57,7 @@ def coco_noniid(dataset, num_users, data, sample_rate):
     dict_users = {i: np.array([]) for i in range(num_users)}    
     total_shards = num_shards * num_imgs
     idxs = np.arange(total_shards)
-    labels_path = './save/labels{}{}.pt'.format(data, sample_rate)
+    labels_path = './save/labels{}.pt'.format(data)
     if os.path.exists(labels_path):
         labels = torch.load(labels_path)[:total_shards]
     else:
@@ -79,7 +79,7 @@ def coco_noniid(dataset, num_users, data, sample_rate):
     # torch.save(dict_users, './save/dict_users.pt') # save to check
     return dict_users
 
-def coco_noniid_unequal(dataset, num_users, data, sample_rate):
+def coco_noniid_unequal(dataset, num_users, data):
     """
     Sample non-I.I.D client data from MNIST dataset s.t clients
     have unequal amount of data
@@ -96,7 +96,7 @@ def coco_noniid_unequal(dataset, num_users, data, sample_rate):
     dict_users = {i: np.array([]) for i in range(num_users)}
     total_shards = num_shards * num_imgs
     idxs = np.arange(total_shards)
-    labels_path = './save/labels{}{}.pt'.format(data, sample_rate)
+    labels_path = './save/labels{}.pt'.format(data)
     if os.path.exists(labels_path):
         labels = torch.load(labels_path)[:total_shards]
     else:

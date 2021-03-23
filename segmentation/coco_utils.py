@@ -141,4 +141,5 @@ def random_n_classes(num_classes):
     indices = np.random.choice(80, num_classes-1, replace=False).tolist()
     n_classes = [catIds[i] for i in indices]
     n_classes.append(0)
+    print(f'chosen classes to train are {n_classes}.')
     return n_classes

@@ -11,7 +11,7 @@ from coco_utils import coco_classes
 
 
 def inference(model, checkpoint, filename, root, num_classes):
-    path = 'checkpoint.pth'
+    path = os.path.join(root, checkpoint)
     checkpoint = torch.load(path, map_location='cpu')
     print(f'Loading check point from experiment :' + checkpoint['exp_name'])
     model.load_state_dict(checkpoint['model'])
@@ -37,11 +37,14 @@ def inference(model, checkpoint, filename, root, num_classes):
     output = model(input_batch)['out'][0]
     predictions = output.argmax(0)
     classes = torch.unique(predictions).tolist()
+    # Class IDs are remapped so need to converted back
+    catIds = [0, 5, 2, 16, 9, 44, 6, 3, 17, 62, 21, 67, 18, 19, 4, 1, 64, 20, 63, 7, 72]
+    classes = [catIds[c] for c in classes]    
     classes = [coco_classes[c] for c in classes if c != 0]
     print(f'Predicted classes are {classes}')
 
     # create a color pallette, selecting a color for each class
-    palette = torch.tensor([2 ** 25 - 1, 2 ** 15 - 1, 2 ** 31 - 1])
+    palette = torch.tensor([2 ** 25 - 1, 2 ** 15 - 1, 2 ** 31 - 1])    
     colors = torch.as_tensor([i for i in range(num_classes)])[:, None] * palette
     colors = (colors % 255).numpy().astype("uint8")
 
@@ -49,7 +52,8 @@ def inference(model, checkpoint, filename, root, num_classes):
     r = Image.fromarray(predictions.byte().cpu().numpy()).resize(input_image.size)
     r.putpalette(colors)
     # ax.imshow(r)
-    r.convert('RGB').save(filename.split('.')[0] + '_mask.jpg')
+    path = os.path.join(root, '21', filename.split('.')[0] + '_mask.jpg')
+    r.convert('RGB').save(path)
     print('Segmentation mask saved.')
 
 if __name__ == '__main__':
@@ -59,3 +63,7 @@ if __name__ == '__main__':
 
     
 #command line
+'''
+python segmentation/inference.py --activation=relu --root=./test --checkpoint=checkpoint4-relu.pth --filename=image1.jpg 
+python segmentation/inference.py --activation=tanh --root=./test --checkpoint=checkpoint31-dp-tanh.pth --dp --filename=image1.jpg
+'''

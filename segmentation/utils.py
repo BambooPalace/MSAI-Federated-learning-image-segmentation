@@ -46,11 +46,11 @@ def get_dataset(args):
                                                                             ConvertCocoPolysToMask(),
                                                                             get_transform(train=False)]))          
          # split train and test indice
-        torch.manual_seed(args.seed)
         n = len(train_dataset)
-        split_idx= n//5 * 4
-        idxs = torch.randperm(len(train_dataset)).tolist()
-        idxs = idxs[:int(n*args.sample_rate)]         
+        torch.manual_seed(args.seed)             
+        idxs = torch.randperm(n).tolist()
+        idxs = idxs[:int(n*args.sample_rate)]
+        split_idx= len(idxs)//5 * 4         
         # torch.save(idxs, 'idxs.pt')#check if same idxs for different runs: YES
         train_dataset = torch.utils.data.Subset(train_dataset, idxs[:split_idx])
         test_dataset = torch.utils.data.Subset(test_dataset, idxs[split_idx:])
@@ -63,10 +63,10 @@ def get_dataset(args):
             # Sample Non-IID user data from Mnist
             if args.unequal:
                 # Chose uneuqal splits for every user
-                user_groups = coco_noniid_unequal(train_dataset, args.num_users, args.data, args.sample_rate)
+                user_groups = coco_noniid_unequal(train_dataset, args.num_users, args.data)
             else:
                 # Chose euqal splits for every user
-                user_groups = coco_noniid(train_dataset, args.num_users, args.data, args.sample_rate)
+                user_groups = coco_noniid(train_dataset, args.num_users, args.data)
 
     else:
         exit('Unrecognized dataset')

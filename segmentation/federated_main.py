@@ -80,15 +80,16 @@ def make_model(args):
 
 
 def get_exp_name(args):
-    exp_name = 'fed_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}]_lr[{}x{}]_{}_{}_weight{}_{}'.\
+    exp_name = 'fed_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}]_lr[{}x{}]_weight{}_{}_n{}'.\
             format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, args.unequal,
-                args.local_ep, args.local_bs, args.lr, args.aux_lr, args.lr_scheduler, args.optimizer, args.weight,
-                args.activation,)
+                args.local_ep, args.local_bs, args.lr, args.aux_lr, args.weight, args.activation, args.num_users,
+                # args.lr_scheduler, args.optimizer, 
+                )
     if args.dp:
-        exp_name = 'fedDP_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}v{}]_lr{}_noise{}_norm{}_weight{}_{}_class{}'.\
+        exp_name = 'fedDP_{}_{}_c{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}v{}]_lr{}_noise{}_norm{}_w{}_{}_n{}'.\
                 format(args.data, args.model, args.num_classes, args.epochs, args.frac, args.iid, \
                     args.unequal, args.local_ep, args.local_bs, args.virtual_bs, args.lr, args.noise_multiplier,
-                    args.max_grad_norm, args.weight, args.activation, args.focus_class,
+                    args.max_grad_norm, args.weight, args.activation, args.num_users,
                     #int(args.no_dropout), args.lr_scheduler, args.optimizer, int(args.freeze_backbone),
                     ) 
     return exp_name
@@ -110,7 +111,7 @@ if __name__ == '__main__':
 
     # load dataset and user groups
     train_dataset, test_dataset, user_groups = get_dataset(args)
-    test_loader = DataLoader(train_dataset, batch_size=1, num_workers=args.num_workers, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=1, num_workers=args.num_workers, shuffle=False)
 
     # BUILD MODEL
     global_model = make_model(args)                   

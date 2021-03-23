@@ -8,10 +8,12 @@ Experiments are produced on MNIST, Fashion MNIST and CIFAR10 (both IID and non-I
 For the purpose of master project, image segmentation of COCO dataset (81 classes) is implemented with fcn_mobilenetv2.
 
 ## Requirments
-Install all the packages from requirments.txt
+Install all the packages from requirements.txt
 * Python3
 * Pytorch
 * Torchvision
+* Opacus
+* Pycocotools
 
 ## Data
 * Download train and test datasets manually or they will be automatically downloaded from torchvision datasets.

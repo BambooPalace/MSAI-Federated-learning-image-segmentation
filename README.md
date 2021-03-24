@@ -135,7 +135,7 @@ optional arguments:
   --weight WEIGHT       the weight assigned to computing loss of background class
   --focus_class FOCUS_CLASS
                         the only class that affect loss function, other class weight set as 0 except background
-  --dp
+  --dp                  must activate for training with differential privacy
   --virtual_bs VIRTUAL_BS
                         the bs for noise addition, to save memory
   --max_grad_norm MAX_GRAD_NORM

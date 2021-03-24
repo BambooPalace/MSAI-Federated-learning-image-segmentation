@@ -4,11 +4,11 @@ This repo is built upon [AshwinRJ](https://github.com/AshwinRJ/Federated-Learnin
 
 As the scope of my project, I fixed code on running FL experiment with CIFAR10 (both IID and non-IID). In case of non-IID, the data amongst the users can be split equally or unequally.
 
-As the main goal of this project and new content on the earlier repo, a more complex task of image segmentation was implementated with federated learning, with  option of IID and non-IID(equal and unequal data distribution), and option of training with differential privacy with Opacus library.
+As the main goal of this project and new content on the earlier repo, a more complex task of image segmentation was implementated with federated learning, with  option of IID and non-IID(equal and unequal data distribution), and option of training with differential privacy (DP) with Opacus library.
 
 Many arguments are provided with this code for tuning all the necessary hyperparameters for training image segmentation with federated learning and differential privacy. Details are included in the `Options` section below.
 
-## Requirments
+## Requirements
 Install all the packages from requirements.txt
 * Python3
 * Pytorch
@@ -18,10 +18,11 @@ Install all the packages from requirements.txt
 
 ## Data
 * The data for image classification: MNIST and CIFAR10 will be automatically downloaded into the `data` subfolder when runing the code in `classification' part.
-* Both the image and annotation data for image segmentation has to be manual downloaded in the `data/folder` before runing experiments on segmentation. The data ready to use has to be in the format of coco dataset, i.e. torchvision.datasets.CocoDetection format. Please refer to the COCO [website](https://cocodataset.org/#download) on how to handle the data.
+* Both the image and annotation data for image segmentation has to be manual downloaded in the `data/folder` before runing experiments on segmentation. The data ready to use has to be in the format of coco dataset, i.e. torchvision.datasets.CocoDetection format. Please refer to the COCO [website](https://cocodataset.org/#download) on how to handle the data. (Suggest download val2017 for experiment purpose.)
 
 ## Running the experiments
-Code will automatically run on gpu if gpu and cuda is available on the machine.
+Code will automatically run on gpu if gpu and cuda is available on the machine. 
+
 ## Classification
 
 * To run the baseline (no federated learning) experiment with MNIST (or CIFAR) on MLP:
@@ -44,6 +45,7 @@ python classification/federated_main.py --model=cnn --dataset=cifar --iid=0 --un
 ```
 
 ## Segmentation
+### Training
 * To run the baseline experiment with COCO (train2017 or val2017 dataset) on lraspp_mobilenetv3 model.
 ```
 python segmentation/baseline_main.py --data=val2017 --model=lraspp_mobilenetv3 --num_classes=21 --epochs=10 --num_workers=4 --save_frequency=1  
@@ -60,8 +62,30 @@ python segmentation/federated_main.py --model=lraspp_mobilenetv3  --num_classes=
 python -W ignore segmentation/federated_main.py --model=lraspp_mobilenetv3 --num_classes=21 --pretrained  --iid=1 --unequal=0 --local_bs=8 --virtual_bs=8 --num_workers=1 --save_frequency=1 --data=val2017 --num_users=50 --local_test_frac=0.1 --no_dropout --lr=0.01 --activation=tanh --weight=0.5 --noise_multiplier=0.2 --max_grad_norm=5 --dp  --local_ep=5  --epochs=5
 ```
 
+### Inference
+* To inference segmentation model checkpoint on images, first save the checkpoint and image in the folder same as the `root` argument before running below:
+```
+==model trained without differential privacy
+python segmentation/inference.py --activation=relu --root=./test --checkpoint=checkpoint-relu.pth --filename=image1.jpg
+==model trained with differential privacy
+python segmentation/inference.py --activation=tanh --root=./test --checkpoint=checkpoint-dp-tanh.pth --dp --filename=image1.jpg
+```
+Do note that for model trained with `dp` and `tanh` activation function, the appropriate arguments should be used to create the model with the same structure as the checkpoint. It's because that during DP training and according to my experiments, model is required to use Group Normalization for privacy preservation and tanh activation instead of default relu for best performance. 
+
+### Experiments
+Logs, training curve and checkpoint will be saved in `save` folder when run.
+The checkpoint and logs are named as below according to experiment conditions:
+```
+fedDP_val2017_lraspp_mobilenetv3_c21_e5_C[0.1]_iid[0]_uneq[0]_E[5]_B[8v8]_lr0.01_noise0.2_norm5.0_w0.5_tanh_n100.pth
+```
+Above checkpoint shows the experiment condition as: `federared learning with DP, lraspp_mobilenetv3 model, 21 classes, 5 rounds, 0.1 fraction of clients, non-iid and equal distribution, 5 local epochs, batch size is 8 and virtual batch_size(DP param)  is 8, learning rate of 0.01, noise multiplier=0.2, max_grad_norm for sample gradient clipping is 5.0, background class loss weight is 0.5, tanh activation function, 100 number of clients.`
+
+For details can refer to `get_exp_name()` in segmentation/federated_main.py for interpretation. 
+
 ## Options for Segmentation
-The default values for various paramters parsed to the experiment are given in ```options.py```. Details are given some of those parameters:
+Below shows the options for training image segmentation with federated learning and differential privacy, options for image classification task is much simpler and should refer in the `classification/options.py`.
+
+The default values for various paramters parsed to the experiment are given in ```segmentation/options.py```. Details are as below:
 
 ```
 optional arguments:
@@ -129,7 +153,7 @@ optional arguments:
 ### Papers:
 * [Communication-Efficient Learning of Deep Networks from Decentralized Data](https://arxiv.org/abs/1602.05629)
 * [Deep Learning with Differential Privacy](https://arxiv.org/abs/1607.00133)
-* [MAKING THE SHOE FIT: ARCHITECTURES, INITIALIZATIONS, AND TUNING FOR LEARNING WITH PRIVACY](https://openreview.net/forum?id=rJg851rYwH)
+* [Making the Shoe fit: Architectures, Initializations, and Tuning for Learning with Privacy](https://openreview.net/forum?id=rJg851rYwH)
 ### Blog Posts:
 * [Federated learning comics](https://federated.withgoogle.com/)
 * [Opacus (a pytorch DP library) FAQ](https://opacus.ai/docs/faq)

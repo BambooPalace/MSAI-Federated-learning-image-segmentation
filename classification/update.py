@@ -6,7 +6,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
-from train import criterion
+# from train import criterion
 
 
 class DatasetSplit(Dataset):
@@ -129,7 +129,7 @@ def test_inference(args, model, test_dataset):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     testloader = DataLoader(test_dataset, batch_size=128,
                             shuffle=False)
-
+    criterion = nn.NLLLoss()
     for batch_idx, (images, labels) in enumerate(testloader):
         images, labels = images.to(device), labels.to(device)
 

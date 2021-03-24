@@ -103,9 +103,10 @@ if __name__ == '__main__':
         train_loss.append(loss_avg)
 
         # Calculate avg training accuracy over all users at every epoch
+        print(f'Testing on {args.local_test_frac} of local dataset')
         list_acc, list_loss = [], []
         global_model.eval()
-        for c in range(args.num_users):
+        for c in range(int(args.num_users * args.local_test_frac)):
             local_model = LocalUpdate(args=args, dataset=train_dataset,
                                       idxs=user_groups[idx], logger=logger)
             acc, loss = local_model.inference(model=global_model)
@@ -133,7 +134,7 @@ if __name__ == '__main__':
     lines.append("|---- Test Accuracy: {:.2f}%".format(100*test_acc))
 
     # Saving the objects train_loss and train_accuracy:
-    file_name = './save/objects/fed_{}_{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}].pkl'.\
+    file_name = './save/fed_{}_{}_e{}_C[{}]_iid[{}]_uneq[{}]_E[{}]_B[{}].pkl'.\
         format(args.dataset, args.model, args.epochs, args.frac, args.iid, args.unequal,
                args.local_ep, args.local_bs)
 

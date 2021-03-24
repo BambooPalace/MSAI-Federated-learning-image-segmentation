@@ -1,10 +1,8 @@
 # Federated-Learning-with-Differential Privacy
 
-This repo is built upon [AshwinRJ](https://github.com/AshwinRJ/Federated-Learning-PyTorch) 's  implementation of the [vanilla federated learning paper](https://arxiv.org/abs/1602.05629) on image classificaton task of MNIST dataset. 
+This repo is built upon [AshwinRJ](https://github.com/AshwinRJ/Federated-Learning-PyTorch) 's  implementation of the [vanilla federated learning paper](https://arxiv.org/abs/1602.05629) on image classificaton task of MNIST dataset. Based on this, I fixed the problem on running FL experiment with CIFAR10 (both IID and non-IID). In case of non-IID, the data amongst the users can be split equally or unequally.
 
-As the scope of my project, I fixed code on running FL experiment with CIFAR10 (both IID and non-IID). In case of non-IID, the data amongst the users can be split equally or unequally.
-
-As the main goal of this project and new content on the earlier repo, a more complex task of image segmentation was implementated with federated learning, with  option of IID and non-IID(equal and unequal data distribution), and option of training with differential privacy (DP) with Opacus library.
+Main component of this repo that I added, is the more complex task of image segmentation implementated with federated learning, with  option of IID and non-IID(equal and unequal data distribution), especially the option of training with differential privacy (DP) with Opacus library.
 
 Many arguments are provided with this code for tuning all the necessary hyperparameters for training image segmentation with federated learning and differential privacy. Details are included in the `Options` section below.
 
@@ -18,7 +16,7 @@ Install all the packages from requirements.txt
 
 ## Data
 * The data for image classification: MNIST and CIFAR10 will be automatically downloaded into the `data` subfolder when runing the code in `classification' part.
-* Both the image and annotation data for image segmentation has to be manual downloaded in the `data/folder` before runing experiments on segmentation. The data ready to use has to be in the format of coco dataset, i.e. torchvision.datasets.CocoDetection format. Please refer to the COCO [website](https://cocodataset.org/#download) on how to handle the data. (Suggest download val2017 for experiment purpose.)
+* For image classification, the image and annotation data  has to be manual downloaded in the `data/folder` before runing experiments on segmentation. The data ready to use has to be in the format of coco dataset, i.e. torchvision.datasets.CocoDetection format. Please refer to the COCO [website](https://cocodataset.org/#download) on how to handle the data. (Suggest download val2017 for experiment purpose.)
 
 ## Running the experiments
 Code will automatically run on gpu if gpu and cuda is available on the machine. 

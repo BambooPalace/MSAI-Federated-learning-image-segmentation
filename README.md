@@ -16,7 +16,9 @@ Install all the packages from requirements.txt
 
 ## Data
 * The data for image classification: MNIST and CIFAR10 will be automatically downloaded into the `data` subfolder when runing the code in `classification' part.
-* For image classification, the image and annotation data  has to be manual downloaded in the `data/folder` before runing experiments on segmentation. The data ready to use has to be in the format of coco dataset, i.e. torchvision.datasets.CocoDetection format. Please refer to the COCO [website](https://cocodataset.org/#download) on how to handle the data. (Suggest download val2017 for experiment purpose.)
+* For image segmentation, COCO is the default dataset used, the image and annotation data  has to be manual downloaded in the `data/coco` before runing experiments on segmentation. Please follow the instructions in `data/README.md`.
+
+To test other dataset for segmentation, the data needs to be processed into torchvision.datasets.CocoDetection format. Please refer to the COCO [website](https://cocodataset.org/#download) on how to handle the data. 
 
 ## Running the experiments
 Code will automatically run on gpu if gpu and cuda is available on the machine. 

@@ -1,4 +1,5 @@
 # Federated-Learning-with-Differential Privacy
+[NTU MSAI Research Project]
 
 This repo is built upon [AshwinRJ](https://github.com/AshwinRJ/Federated-Learning-PyTorch) 's  implementation of the [vanilla federated learning paper](https://arxiv.org/abs/1602.05629) on image classificaton task of MNIST dataset. Based on this, I fixed the problem on running FL experiment with CIFAR10 (both IID and non-IID). In case of non-IID, the data amongst the users can be split equally or unequally.
 
